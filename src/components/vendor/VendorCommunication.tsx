@@ -210,7 +210,7 @@ const mockReviews: Review[] = [
     content: 'The Family Meal Bundle was perfect for my busy week! Everything was fresh, delicious, and so convenient. Will definitely order again.',
     date: '2023-10-15T18:30:00Z',
     replied: true,
-    reply: 'Thank you for your wonderful review, Jennifer! We're so glad you enjoyed the Family Meal Bundle and look forward to serving you again soon.',
+    reply: 'Thank you for your wonderful review, Jennifer! We\'re so glad you enjoyed the Family Meal Bundle and look forward to serving you again soon.',
     replyDate: '2023-10-16T09:45:00Z',
   },
   {
@@ -241,7 +241,7 @@ const mockReviews: Review[] = [
     content: 'The food quality was good, but I found some of the instructions for reheating a bit confusing. Maybe include clearer directions next time?',
     date: '2023-10-08T20:45:00Z',
     replied: true,
-    reply: 'Thank you for your feedback, David. We apologize for the confusion with the reheating instructions. We're working on making them clearer and more detailed. We appreciate you bringing this to our attention!',
+    reply: 'Thank you for your feedback, David. We apologize for the confusion with the reheating instructions. We\'re working on making them clearer and more detailed. We appreciate you bringing this to our attention!',
     replyDate: '2023-10-09T10:10:00Z',
   },
 ];
