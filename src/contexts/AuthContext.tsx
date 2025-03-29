@@ -1,6 +1,5 @@
-
 import { useState, useEffect, createContext } from 'react';
-import { User, authUtils } from '@/utils/authUtils';
+import { User, transformUser } from '@/utils/authUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';

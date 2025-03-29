@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -6,12 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { authUtils } from '@/utils/authUtils';
+import { toast } from 'sonner';
 
 export function ProfileSettings() {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { user, updateUserProfile } = useAuth();
   
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -33,24 +30,17 @@ export function ProfileSettings() {
     
     setIsLoading(true);
     try {
-      const result = await authUtils.updateUserProfile(user.id, {
+      const success = await updateUserProfile({
         name: formData.name,
         phone: formData.phone
       });
       
-      if (result.success) {
-        toast({
-          title: "Profile updated",
-          description: "Your profile information has been updated successfully."
-        });
-      } else {
-        throw new Error(result.error || "Failed to update profile");
+      if (!success) {
+        throw new Error("Failed to update profile");
       }
     } catch (error) {
-      toast({
-        title: "Update failed",
-        description: (error as Error).message,
-        variant: "destructive"
+      toast.error("Update failed", {
+        description: (error as Error).message
       });
     } finally {
       setIsLoading(false);
