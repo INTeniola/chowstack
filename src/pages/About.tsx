@@ -11,10 +11,10 @@ const About = () => {
       <Navbar />
       <main className="container-custom py-12">
         <section className="mb-12">
-          <h1 className="text-4xl font-bold text-center mb-8">About MealStock</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">About ChowStack</h1>
           <div className="max-w-3xl mx-auto text-center mb-8">
             <p className="text-lg text-muted-foreground mb-4">
-              MealStock is Nigeria's premier bulk meal delivery service, designed to solve the challenge of nutritious meal planning for busy professionals, families, and organizations.
+              ChowStack is Nigeria's premier bulk meal delivery service, designed to solve the challenge of nutritious meal planning for busy professionals, families, and organizations.
             </p>
             <p className="text-lg text-muted-foreground">
               Founded in 2022, we've grown from a small startup to a nationwide service delivering thousands of meals weekly.
@@ -69,7 +69,7 @@ const About = () => {
           <h2 className="text-3xl font-bold text-center mb-8">Our Story</h2>
           <div className="max-w-4xl mx-auto">
             <p className="mb-4">
-              MealStock began when our founder, a busy Lagos professional, struggled to maintain healthy eating habits while balancing work and life. After discovering many colleagues shared the same challenge, the idea for a bulk meal preparation and delivery service was born.
+              ChowStack began when our founder, a busy Lagos professional, struggled to maintain healthy eating habits while balancing work and life. After discovering many colleagues shared the same challenge, the idea for a bulk meal preparation and delivery service was born.
             </p>
             <p className="mb-4">
               Starting with just three local chefs and serving only the Lagos Island area, we've expanded to serve major cities across Nigeria with a network of over 50 partner chefs and food vendors.
