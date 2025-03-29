@@ -10,8 +10,29 @@ import { Toaster } from "@/components/ui/toaster";
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { AuthProvider } from './hooks/useAuth';
 import { VendorAuthProvider } from './hooks/useVendorAuth';
+import { ConnectivityProvider } from './contexts/ConnectivityContext';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: (failureCount, error) => {
+        // Don't retry on 404s or if offline
+        if (
+          // @ts-ignore
+          error?.status === 404 || 
+          !navigator.onLine || 
+          failureCount > 2
+        ) {
+          return false;
+        }
+        return true;
+      },
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -20,10 +41,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <VendorAuthProvider>
-              <NotificationsProvider>
-                <App />
-                <Toaster />
-              </NotificationsProvider>
+              <ConnectivityProvider>
+                <NotificationsProvider>
+                  <App />
+                  <Toaster />
+                </NotificationsProvider>
+              </ConnectivityProvider>
             </VendorAuthProvider>
           </AuthProvider>
         </QueryClientProvider>
@@ -31,3 +54,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </React.StrictMode>,
 );
+
+// Register the service worker for offline capabilities
+serviceWorkerRegistration.register({
+  onSuccess: () => console.log('MealStock is now available offline'),
+  onUpdate: (registration) => {
+    console.log('New version available', registration);
+    // Optional: Add UI to notify users about updates
+  },
+});
