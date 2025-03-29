@@ -84,7 +84,7 @@
   }
 
   body {
-    @apply bg-mealstock-cream text-mealstock-brown font-sans;
+    @apply bg-background text-foreground font-sans;
   }
 }
 

@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { type ThemeProviderProps } from "next-themes/dist/types"
 
 // Define Theme type more explicitly
-type Theme = "dark" | "light" | "system" | string
+type Theme = "dark" | "light" | "system"
 
 // Update ThemeContextType to ensure it exactly matches what we provide
 type ThemeContextType = {
@@ -60,7 +60,7 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext.Provider value={value}>
-      <div {...props}>{children}</div>
+      <div className={theme} {...props}>{children}</div>
     </ThemeProviderContext.Provider>
   )
 }
