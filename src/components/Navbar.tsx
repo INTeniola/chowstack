@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useVendorAuth } from '@/hooks/useVendorAuth';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Moon, Sun } from 'lucide-react';
@@ -32,14 +33,14 @@ const Navbar: React.FC = () => {
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
-      })
+      });
       navigate('/login');
     } else if (vendor) {
       await logout();
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
-      })
+      });
       navigate('/vendor/login');
     }
   };
@@ -48,7 +49,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-white border-b border-gray-200 py-2.5">
       <div className="container-custom flex flex-wrap items-center justify-between mx-auto">
         <Link to="/" className="flex items-center">
-          <img src={logo} className="h-6 mr-3 sm:h-9" alt="MealStock Logo" />
+          <img src={logo} className="h-6 mr-3 sm:h-9" alt="MealStock logo" />
           <span className="self-center text-xl font-semibold whitespace-nowrap">MealStock</span>
         </Link>
         
@@ -111,6 +112,7 @@ const Navbar: React.FC = () => {
                 </Link>
               </>
             )}
+            
             <Button
               variant="ghost"
               size="icon"
