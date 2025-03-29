@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -8,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Lock, Phone, Eye, EyeOff, MapPin, RefreshCw, AlertCircle, Check } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, MapPin, AlertCircle, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { generateSecurePassword, checkPasswordStrength } from '@/utils/passwordUtils';
 import { toast } from 'sonner';
@@ -96,7 +97,7 @@ const Register = () => {
       
       if (success) {
         toast.success("Account created successfully", {
-          description: "Welcome to MealStock!"
+          description: "Welcome to ChowStack!"
         });
         navigate('/login');
       }
@@ -106,11 +107,11 @@ const Register = () => {
     }
   };
   
-  const handleGeneratePassword = () => {
+  const handleSuggestPassword = () => {
     const newPassword = generateSecurePassword();
     form.setValue("password", newPassword);
     setPasswordStrength(checkPasswordStrength(newPassword));
-    toast.success("Secure password generated! Make sure to save it somewhere safe.");
+    toast.success("Secure password suggested! Make sure to save it somewhere safe.");
   };
 
   const getStrengthColor = () => {
@@ -130,7 +131,7 @@ const Register = () => {
               Create your account
             </CardTitle>
             <CardDescription className="text-center">
-              Enter your details to sign up for a MealStock account
+              Enter your details to sign up for a ChowStack account
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -150,12 +151,12 @@ const Register = () => {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <TabsContent value="account" className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
                         name="name"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="col-span-1">
                             <FormLabel>Full Name</FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -176,7 +177,7 @@ const Register = () => {
                         control={form.control}
                         name="email"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="col-span-1">
                             <FormLabel>Email Address</FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -198,7 +199,7 @@ const Register = () => {
                         control={form.control}
                         name="phone"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="col-span-1">
                             <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -220,20 +221,19 @@ const Register = () => {
                         control={form.control}
                         name="password"
                         render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center justify-between">
-                              <FormLabel>Password</FormLabel>
+                          <FormItem className="col-span-1">
+                            <FormLabel className="flex justify-between items-center">
+                              <span>Password</span>
                               <Button 
                                 type="button" 
-                                variant="ghost" 
+                                variant="link" 
                                 size="sm"
-                                className="h-8 text-mealstock-green flex gap-1 items-center px-2"
-                                onClick={handleGeneratePassword}
+                                className="h-auto p-0 text-mealstock-green text-xs"
+                                onClick={handleSuggestPassword}
                               >
-                                <RefreshCw className="h-3 w-3" />
-                                <span className="text-xs">Generate</span>
+                                Suggest secure password
                               </Button>
-                            </div>
+                            </FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
