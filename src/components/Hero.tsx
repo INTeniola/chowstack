@@ -9,10 +9,7 @@ import {
 } from '@/components/ui/carousel';
 import { ResponsiveImage } from '@/components/uploads/ResponsiveImage';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-interface HeroProps {
-  onOpenAuth: () => void;
-}
+import { Link } from 'react-router-dom';
 
 // Nigerian food images for the slideshow
 const NIGERIAN_FOODS = [
@@ -34,7 +31,7 @@ const NIGERIAN_FOODS = [
   }
 ];
 
-const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
+const Hero: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const isMobile = useIsMobile();
 
@@ -63,12 +60,14 @@ const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-                onClick={onOpenAuth}
                 className="btn-primary"
                 size="lg"
+                asChild
               >
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <Link to="/register">
+                  Get Started
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
               </Button>
             </div>
             
@@ -84,11 +83,11 @@ const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
             </div>
           </div>
           
+          {/* Nigerian Food Slideshow */}
           <div className="relative">
             <div className="aspect-square rounded-full bg-mealstock-lightGreen absolute -right-10 -top-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
             <div className="aspect-square rounded-full bg-mealstock-lightOrange absolute -left-10 -bottom-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
             
-            {/* Nigerian Food Slideshow */}
             <div className="bg-mealstock-orange/10 rounded-2xl p-2 border border-mealstock-orange/20 relative z-10 overflow-hidden">
               <Carousel className="w-full">
                 <CarouselContent>

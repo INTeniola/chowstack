@@ -1,27 +1,18 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import Footer from '@/components/Footer';
-import AuthModal from '@/components/AuthModal';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  const handleOpenAuthModal = () => {
-    setIsAuthModalOpen(true);
-  };
-
-  const handleCloseAuthModal = () => {
-    setIsAuthModalOpen(false);
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <Hero onOpenAuth={handleOpenAuthModal} />
+        <Hero />
         <Features />
         
         {/* How It Works Section */}
@@ -161,16 +152,18 @@ const Index = () => {
                         ))}
                       </ul>
                     </div>
-                    <button 
+                    <Button 
                       className={`w-full py-3 rounded-md font-medium mt-auto ${
                         plan.featured 
                         ? 'bg-mealstock-orange hover:bg-mealstock-orange/90 text-white' 
                         : 'bg-mealstock-green hover:bg-mealstock-green/90 text-white'
                       }`}
-                      onClick={handleOpenAuthModal}
+                      asChild
                     >
-                      Get Started
-                    </button>
+                      <Link to="/register">
+                        Get Started
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -179,7 +172,6 @@ const Index = () => {
         </section>
       </main>
       <Footer />
-      <AuthModal isOpen={isAuthModalOpen} onClose={handleCloseAuthModal} />
     </div>
   );
 };
