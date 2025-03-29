@@ -5,11 +5,14 @@ import { Button } from '@/components/ui/button';
 import { 
   Carousel,
   CarouselContent,
-  CarouselItem
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext
 } from '@/components/ui/carousel';
 import { ResponsiveImage } from '@/components/uploads/ResponsiveImage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 // Nigerian food images for the slideshow
 const NIGERIAN_FOODS = [
@@ -33,27 +36,86 @@ const NIGERIAN_FOODS = [
 
 const Hero: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [foodImages, setFoodImages] = useState(NIGERIAN_FOODS);
   const isMobile = useIsMobile();
+
+  // Fetch images from Supabase storage
+  useEffect(() => {
+    const fetchImagesFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .storage
+          .from('food-images')
+          .list('');
+
+        if (error) {
+          console.error('Error fetching images from Supabase:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Filter for image files only
+          const imageFiles = data.filter(file => 
+            file.name.match(/\.(jpeg|jpg|png|webp)$/i)
+          );
+
+          if (imageFiles.length > 0) {
+            // Create URLs for the images
+            const supabaseImages = imageFiles.map(file => {
+              const { publicURL } = supabase
+                .storage
+                .from('food-images')
+                .getPublicUrl(file.name);
+              
+              return {
+                src: publicURL || '',
+                alt: file.name.split('.')[0].replace(/-|_/g, ' ')
+              };
+            });
+            
+            setFoodImages(supabaseImages);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch images:', error);
+      }
+    };
+
+    fetchImagesFromSupabase();
+  }, []);
 
   // Auto rotate images every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
-        prevIndex === NIGERIAN_FOODS.length - 1 ? 0 : prevIndex + 1
+        prevIndex === foodImages.length - 1 ? 0 : prevIndex + 1
       );
     }, 5000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [foodImages.length]);
 
   return (
     <section className="relative py-12 md:py-20 bg-gradient-to-b from-mealstock-cream to-white overflow-hidden">
+      {/* Food-themed decorative elements */}
+      <div className="absolute top-0 left-0 w-32 h-32 opacity-10">
+        <img src="/assets/food-icons/spoon.svg" alt="Spoon Icon" className="text-mealstock-orange w-full h-full" />
+      </div>
+      
+      <div className="absolute bottom-0 right-0 w-40 h-40 opacity-10">
+        <img src="/assets/food-icons/pot.svg" alt="Pot Icon" className="text-mealstock-green w-full h-full" />
+      </div>
+      
+      <div className="absolute top-1/3 right-10 w-24 h-24 opacity-10">
+        <img src="/assets/food-icons/plate.svg" alt="Plate Icon" className="text-mealstock-brown w-full h-full" />
+      </div>
+      
       <div className="container-custom relative z-10">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-mealstock-brown">
               Your Weekly Feasts, <br className="hidden md:block" />
-              One Delivery Away
+              <span className="text-mealstock-orange">One Delivery Away</span>
             </h1>
             <p className="text-lg text-mealstock-brown/80">
               Stock your fridge with authentic Nigerian cuisine, delivered in bulk. Save time, reduce costs, and enjoy home-style cooking without the daily hassle.
@@ -97,13 +159,17 @@ const Hero: React.FC = () => {
             <div className="bg-mealstock-orange/10 rounded-2xl p-2 border border-mealstock-orange/20 relative z-10 overflow-hidden">
               <Carousel className="w-full">
                 <CarouselContent>
-                  {NIGERIAN_FOODS.map((food, index) => (
+                  {foodImages.map((food, index) => (
                     <CarouselItem key={index}>
                       <div className="relative aspect-video w-full overflow-hidden rounded-xl">
                         <img
                           src={food.src}
                           alt={food.alt}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Fallback to Unsplash images if Supabase images fail to load
+                            e.currentTarget.src = NIGERIAN_FOODS[index % NIGERIAN_FOODS.length].src;
+                          }}
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                           <p className="text-white font-medium text-sm md:text-base">
@@ -114,22 +180,16 @@ const Hero: React.FC = () => {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
+                {!isMobile && (
+                  <>
+                    <CarouselPrevious className="left-2" />
+                    <CarouselNext className="right-2" />
+                  </>
+                )}
               </Carousel>
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Decorative elements */}
-      <div className="absolute hidden md:block left-5 top-1/4 w-20 h-20 text-mealstock-orange opacity-20">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,10.5A1.5,1.5 0 0,1 13.5,12A1.5,1.5 0 0,1 12,13.5A1.5,1.5 0 0,1 10.5,12A1.5,1.5 0 0,1 12,10.5Z" />
-        </svg>
-      </div>
-      <div className="absolute hidden md:block right-10 bottom-1/3 w-16 h-16 text-mealstock-green opacity-20">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,10.5A1.5,1.5 0 0,1 13.5,12A1.5,1.5 0 0,1 12,13.5A1.5,1.5 0 0,1 10.5,12A1.5,1.5 0 0,1 12,10.5Z" />
-        </svg>
       </div>
     </section>
   );
