@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, User, Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { signUp, isAuthenticated, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -22,37 +22,42 @@ const Register = () => {
     confirmPassword: ''
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    // Clear previous error when user types
+    setFormError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please ensure both passwords match.",
-        variant: "destructive"
-      });
+      setFormError("Passwords don't match. Please ensure both passwords match.");
       return;
     }
     
-    setIsLoading(true);
+    const success = await signUp(
+      formData.email, 
+      formData.password,
+      formData.fullName,
+      formData.phone
+    );
     
-    // This would be an actual API call in production
-    setTimeout(() => {
-      toast({
-        title: "Registration successful!",
-        description: "Your account has been created. You can now log in.",
-      });
-      setIsLoading(false);
+    if (success) {
+      // If sign up was successful, redirect to login page
       navigate('/login');
-    }, 1500);
+    }
   };
 
   return (
@@ -70,6 +75,11 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {formError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                {formError}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="fullName" className="text-sm font-medium">
@@ -194,10 +204,20 @@ const Register = () => {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/login')}
+                type="button"
+              >
                 Google
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/login')}
+                type="button"
+              >
                 Facebook
               </Button>
             </div>

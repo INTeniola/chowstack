@@ -1,6 +1,6 @@
 
-// This is a placeholder file that will be integrated with Supabase
-// We'll expand this with actual authentication logic once Supabase is connected
+import { supabase } from '@/integrations/supabase/client';
+import { AuthError, AuthResponse, User as SupabaseUser } from '@supabase/supabase-js';
 
 // User types
 export interface User {
@@ -34,47 +34,155 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-// Mock functions - to be replaced with actual Supabase integration
+// Transform Supabase user to our User type
+const transformUser = (supabaseUser: SupabaseUser): User => {
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    name: supabaseUser.user_metadata?.name || '',
+    phone: supabaseUser.phone || supabaseUser.user_metadata?.phone || '',
+    role: 'customer' // Default role
+  };
+};
+
+// Supabase auth utils
 export const authUtils = {
   // Sign in with email and password
   signInWithEmail: async (email: string, password: string) => {
-    console.log('Sign in with email:', email, password);
-    return { success: true, user: null };
+    try {
+      const { data, error }: AuthResponse = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      return { 
+        success: true, 
+        user: data.user ? transformUser(data.user) : null 
+      };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { 
+        success: false, 
+        error: (error as AuthError).message,
+        user: null 
+      };
+    }
   },
   
   // Sign up with email and password
   signUpWithEmail: async (email: string, password: string, phone: string, name: string) => {
-    console.log('Sign up with email:', email, password, phone, name);
-    return { success: true, user: null };
+    try {
+      const { data, error }: AuthResponse = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            phone
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      return { 
+        success: true, 
+        user: data.user ? transformUser(data.user) : null 
+      };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { 
+        success: false, 
+        error: (error as AuthError).message,
+        user: null 
+      };
+    }
   },
   
   // Sign in with social provider
   signInWithSocial: async (provider: 'facebook' | 'twitter' | 'google') => {
-    console.log('Sign in with social:', provider);
-    return { success: true, user: null };
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
+      if (error) throw error;
+      
+      return { success: true, user: null };
+    } catch (error) {
+      console.error('Social sign in error:', error);
+      return { 
+        success: false, 
+        error: (error as AuthError).message,
+        user: null 
+      };
+    }
   },
   
   // Sign out
   signOut: async () => {
-    console.log('Sign out');
-    return { success: true };
-  },
-  
-  // Verify phone number
-  verifyPhone: async (phone: string, code: string) => {
-    console.log('Verify phone:', phone, code);
-    return { success: true };
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Sign out error:', error);
+      return { 
+        success: false, 
+        error: (error as AuthError).message 
+      };
+    }
   },
   
   // Get current user
   getCurrentUser: async () => {
-    console.log('Get current user');
-    return null;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user ? transformUser(user) : null;
+    } catch (error) {
+      console.error('Get current user error:', error);
+      return null;
+    }
   },
   
   // Update user preferences
   updateUserPreferences: async (userId: string, preferences: Partial<UserPreferences>) => {
-    console.log('Update user preferences:', userId, preferences);
-    return { success: true };
+    try {
+      // Get the current user data
+      const { data: currentUserData, error: fetchError } = await supabase
+        .from('profiles')
+        .select('preferences')
+        .eq('id', userId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Merge the current preferences with the new ones
+      const updatedPreferences = {
+        ...(currentUserData?.preferences || {}),
+        ...preferences
+      };
+      
+      // Update the user's preferences
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ preferences: updatedPreferences })
+        .eq('id', userId);
+      
+      if (updateError) throw updateError;
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Update user preferences error:', error);
+      return { 
+        success: false, 
+        error: (error as any).message 
+      };
+    }
   }
 };

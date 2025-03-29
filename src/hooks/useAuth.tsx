@@ -1,5 +1,8 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import { User, authUtils } from '@/utils/authUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { Session } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
 
 export interface UserPreferences {
@@ -15,44 +18,14 @@ export interface UserPreferences {
   };
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  joinDate: string;
-  preferences?: UserPreferences;
-}
-
-// Mock user data for demonstration
-const mockUser: User = {
-  id: 'u1',
-  name: 'John Doe',
-  email: 'john@example.com',
-  phone: '555-987-6543',
-  address: '456 Oak St, Anytown, USA',
-  joinDate: '2023-01-10',
-  preferences: {
-    notificationSettings: {
-      email: true,
-      sms: true,
-      app: true,
-      voice: false
-    },
-    deliveryPreferences: {
-      timeSlot: 'evening',
-      instructions: 'Leave at the door'
-    }
-  }
-};
-
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  session: Session | null;
   login: (email: string, password: string) => Promise<boolean>;
   signOut: () => void;
+  signUp: (email: string, password: string, name: string, phone: string) => Promise<boolean>;
   updateUserProfile: (updates: Partial<User>) => Promise<boolean>;
   updateUserPreferences: (updates: Partial<UserPreferences>) => Promise<boolean>;
 }
@@ -61,39 +34,67 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user session
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
+    // First set up the auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          const user = await authUtils.getCurrentUser();
+          setUser(user);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+        
+        // Only set loading to false after we've handled the auth state change
+        if (event === 'INITIAL_SESSION') {
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        authUtils.getCurrentUser().then(user => {
+          if (user) {
+            setUser(user);
+            setIsAuthenticated(true);
+          }
+        });
+      }
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // This would be an actual API call in production
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { success, error, user } = await authUtils.signInWithEmail(email, password);
       
-      // For demo purposes, we'll accept any email and password with length >= 6
-      if (email.length > 0 && password.length >= 6) {
-        setUser(mockUser);
+      if (success && user) {
+        setUser(user);
         setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(mockUser));
         toast({
           title: "Login successful",
-          description: `Welcome back, ${mockUser.name}!`,
+          description: `Welcome back!`,
         });
         return true;
       } else {
         toast({
           title: "Login failed",
-          description: "Invalid email or password. Try using an email and a password with 6+ characters.",
+          description: error || "Invalid email or password",
           variant: "destructive",
         });
         return false;
@@ -110,33 +111,86 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signOut = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('user');
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
+  const signUp = async (email: string, password: string, name: string, phone: string) => {
+    setIsLoading(true);
+    try {
+      const { success, error } = await authUtils.signUpWithEmail(email, password, phone, name);
+      
+      if (success) {
+        toast({
+          title: "Registration successful",
+          description: "Please check your email to verify your account.",
+        });
+        return true;
+      } else {
+        toast({
+          title: "Registration failed",
+          description: error || "Could not create account",
+          variant: "destructive",
+        });
+        return false;
+      }
+    } catch (error) {
+      toast({
+        title: "Registration error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signOut = async () => {
+    const { success } = await authUtils.signOut();
+    if (success) {
+      setUser(null);
+      setSession(null);
+      setIsAuthenticated(false);
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    }
   };
 
   const updateUserProfile = async (updates: Partial<User>) => {
+    if (!user) return false;
+
     try {
-      // This would be an actual API call in production
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      if (user) {
-        const updatedUser = { ...user, ...updates };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        toast({
-          title: "Profile updated",
-          description: "Your profile information has been updated successfully.",
-        });
-        return true;
+      // Update the user's metadata in Supabase
+      const { error } = await supabase.auth.updateUser({
+        data: updates
+      });
+
+      if (error) throw error;
+
+      // Also update the profiles table if needed
+      if (updates.name || updates.phone || updates.address) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            name: updates.name,
+            phone: updates.phone,
+            address: updates.address,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
       }
-      return false;
+
+      // Update the local user state
+      setUser(prev => prev ? { ...prev, ...updates } : null);
+
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully.",
+      });
+      return true;
     } catch (error) {
+      console.error('Update profile error:', error);
       toast({
         title: "Update failed",
         description: "Failed to update profile. Please try again later.",
@@ -147,23 +201,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateUserPreferences = async (updates: Partial<UserPreferences>) => {
+    if (!user) return false;
+
     try {
-      // This would be an actual API call in production
-      await new Promise(resolve => setTimeout(resolve, 600));
+      const result = await authUtils.updateUserPreferences(user.id, updates);
       
-      if (user) {
-        const updatedPreferences = { ...user.preferences, ...updates };
-        const updatedUser = { ...user, preferences: updatedPreferences };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+      if (result.success) {
+        // Update local user state
+        setUser(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            preferences: {
+              ...prev.preferences,
+              ...updates
+            }
+          };
+        });
+
         toast({
           title: "Preferences updated",
           description: "Your preferences have been updated successfully.",
         });
         return true;
+      } else {
+        throw new Error(result.error);
       }
-      return false;
     } catch (error) {
+      console.error('Update preferences error:', error);
       toast({
         title: "Update failed",
         description: "Failed to update preferences. Please try again later.",
@@ -173,12 +238,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const authContextValue = {
+  const authContextValue: AuthState = {
     user,
     isAuthenticated,
     isLoading,
+    session,
     login,
     signOut,
+    signUp,
     updateUserProfile,
     updateUserPreferences,
   };
