@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import { 
   Facebook, 
@@ -38,16 +39,16 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold text-lg mb-4 text-white">Company</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">About Us</a>
+                <Link to="/about" className="text-white/80 hover:text-white transition-colors">About Us</Link>
               </li>
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">Our Chefs</a>
+                <Link to="/our-chefs" className="text-white/80 hover:text-white transition-colors">Our Chefs</Link>
               </li>
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">Careers</a>
+                <Link to="/careers" className="text-white/80 hover:text-white transition-colors">Careers</Link>
               </li>
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">Press</a>
+                <Link to="/press" className="text-white/80 hover:text-white transition-colors">Press</Link>
               </li>
             </ul>
           </div>
@@ -56,16 +57,16 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold text-lg mb-4 text-white">Resources</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">Help Center</a>
+                <Link to="/help-center" className="text-white/80 hover:text-white transition-colors">Help Center</Link>
               </li>
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">Blog</a>
+                <Link to="/blog" className="text-white/80 hover:text-white transition-colors">Blog</Link>
               </li>
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">FAQs</a>
+                <Link to="/faqs" className="text-white/80 hover:text-white transition-colors">FAQs</Link>
               </li>
               <li>
-                <a href="#" className="text-white/80 hover:text-white transition-colors">Privacy Policy</a>
+                <Link to="/privacy-policy" className="text-white/80 hover:text-white transition-colors">Privacy Policy</Link>
               </li>
             </ul>
           </div>

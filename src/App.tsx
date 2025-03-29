@@ -15,6 +15,19 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { OfflineIndicator } from "./components/ui/offline-indicator";
 import { useConnectivity } from "./contexts/ConnectivityContext";
 
+// New pages
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import OurChefs from "./pages/OurChefs";
+import Careers from "./pages/Careers";
+import Press from "./pages/Press";
+import HelpCenter from "./pages/HelpCenter";
+import Blog from "./pages/Blog";
+import FAQs from "./pages/FAQs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+
 const App = () => {
   const { isOnline, lowBandwidthMode } = useConnectivity();
   
@@ -33,6 +46,20 @@ const App = () => {
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            
+            {/* New Routes */}
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/our-chefs" element={<OurChefs />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/press" element={<Press />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/faqs" element={<FAQs />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
