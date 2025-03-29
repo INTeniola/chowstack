@@ -9,6 +9,8 @@ import Discovery from "./pages/Discovery";
 import MealPlanner from "./pages/MealPlanner";
 import CommunityHub from "./pages/CommunityHub";
 import VendorPortal from "./pages/VendorPortal";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/meal-planner" element={<MealPlanner />} />
           <Route path="/community" element={<CommunityHub />} />
           <Route path="/vendor" element={<VendorPortal />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-confirmation" element={<OrderConfirmation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
