@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { format } from 'date-fns';
 import { Percent, Tag, Package, Calendar } from 'lucide-react';
 import { Promotion } from '../types/promotionTypes';
