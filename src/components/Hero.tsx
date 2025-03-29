@@ -62,13 +62,14 @@ const Hero: React.FC = () => {
           if (imageFiles.length > 0) {
             // Create URLs for the images
             const supabaseImages = imageFiles.map(file => {
-              const { publicURL } = supabase
+              // Fixed: The correct property is publicUrl (lowercase 'u')
+              const { data } = supabase
                 .storage
                 .from('food-images')
                 .getPublicUrl(file.name);
               
               return {
-                src: publicURL || '',
+                src: data.publicUrl || '',
                 alt: file.name.split('.')[0].replace(/-|_/g, ' ')
               };
             });
