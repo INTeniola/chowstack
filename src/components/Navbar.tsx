@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,7 +16,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Moon, Sun, Settings } from 'lucide-react';
 import { useTheme } from '@/components/ui/theme-provider';
 import Logo from './Logo';
-import NotificationBell from './notifications/NotificationBell';
 import MobileMenu from './MobileMenu';
 
 const Navbar: React.FC = () => {
@@ -55,8 +53,6 @@ const Navbar: React.FC = () => {
         </div>
         
         <div className="flex items-center md:order-2 gap-2">
-          <NotificationBell />
-            
           {user || vendor ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -125,7 +121,6 @@ const Navbar: React.FC = () => {
             <span className="sr-only">Toggle theme</span>
           </Button>
           
-          {/* Mobile menu trigger moved to the right edge */}
           <div className="md:hidden">
             <MobileMenu />
           </div>

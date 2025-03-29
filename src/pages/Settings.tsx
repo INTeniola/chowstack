@@ -12,6 +12,7 @@ import { UserRatings } from '@/components/ratings/UserRatings';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import NotificationsList from '@/components/notifications/NotificationsList';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -38,6 +39,7 @@ const Settings = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-8">
               <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
               <TabsTrigger value="connectivity">Connectivity Settings</TabsTrigger>
               <TabsTrigger value="orders">Order History</TabsTrigger>
               <TabsTrigger value="ratings">My Ratings</TabsTrigger>
@@ -45,6 +47,10 @@ const Settings = () => {
             
             <TabsContent value="profile" className="bg-white p-6 rounded-lg border">
               <ProfileSettings />
+            </TabsContent>
+            
+            <TabsContent value="notifications" className="bg-white p-6 rounded-lg border">
+              <NotificationsList />
             </TabsContent>
             
             <TabsContent value="connectivity" className="bg-white p-6 rounded-lg border">
