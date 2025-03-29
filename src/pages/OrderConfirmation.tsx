@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import OrderPreservationSummary from '@/components/preservation/OrderPreservationSummary';
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
@@ -20,21 +21,38 @@ const OrderConfirmation = () => {
     paymentStatus: 'Paid',
     items: [
       {
+        id: '1',
         name: 'Jollof Rice Pack',
         quantity: 2,
         price: 2500,
+        image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2940&auto=format&fit=crop',
+        vendorId: 'v1',
+        vendorName: 'Mama's Kitchen',
       },
       {
+        id: '2',
         name: 'Egusi Soup with Pounded Yam',
         quantity: 1,
         price: 3000,
+        image: 'https://images.unsplash.com/photo-1643456255035-6cc55e8bf35f?q=80&w=2930&auto=format&fit=crop',
+        vendorId: 'v2',
+        vendorName: 'Royal Cuisine',
+      },
+      {
+        id: '3',
+        name: 'Grilled Fish with Plantain',
+        quantity: 1,
+        price: 3500,
+        image: 'https://images.unsplash.com/photo-1579631542780-2c548441522c?q=80&w=2896&auto=format&fit=crop',
+        vendorId: 'v3',
+        vendorName: 'Ocean Delight',
       },
     ],
-    subtotal: 8000,
+    subtotal: 11500,
     deliveryFee: 1500,
     discount: 800,
     tax: 540,
-    total: 9240,
+    total: 12740,
   };
   
   return (
@@ -43,7 +61,7 @@ const OrderConfirmation = () => {
       
       <main className="flex-1 py-8">
         <div className="container-custom max-w-3xl">
-          <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+          <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 mb-6">
             <div className="flex justify-center mb-6">
               <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center">
                 <Check className="h-10 w-10 text-green-600" />
@@ -157,6 +175,9 @@ const OrderConfirmation = () => {
               </Button>
             </div>
           </div>
+          
+          {/* Add the preservation summary component */}
+          <OrderPreservationSummary items={orderDetails.items} />
         </div>
       </main>
       
