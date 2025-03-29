@@ -18,6 +18,7 @@ import { Moon, Sun, Settings } from 'lucide-react';
 import { useTheme } from '@/components/ui/theme-provider';
 import Logo from './Logo';
 import NotificationBell from './notifications/NotificationBell';
+import MobileMenu from './MobileMenu';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -47,9 +48,14 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-background border-b border-border py-2.5">
       <div className="container-custom flex flex-wrap items-center justify-between mx-auto">
-        <Link to="/" className="flex items-center">
-          <Logo size="md" withText={true} />
-        </Link>
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center">
+            <Logo size="md" withText={true} />
+          </Link>
+          <div className="ml-4 md:hidden">
+            <MobileMenu />
+          </div>
+        </div>
         
         <div className="flex items-center md:order-2">
           <div className="flex items-center gap-2">

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SignUpData } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const registerSchema = z.object({
   name: z.string().min(2, "Full name must be at least 2 characters"),
@@ -45,6 +46,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
   
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -138,14 +140,99 @@ const Register = () => {
               </div>
             )}
             
-            <Tabs defaultValue="account" className="w-full">
+            <Tabs defaultValue="accountType" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="account">Account Information</TabsTrigger>
                 <TabsTrigger value="accountType">Account Type</TabsTrigger>
+                <TabsTrigger value="account">Account Information</TabsTrigger>
               </TabsList>
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <TabsContent value="accountType" className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="accountType"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel>Account Type</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col space-y-3"
+                            >
+                              <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                  <RadioGroupItem value="customer" />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer flex-1">
+                                  <div className="font-medium">Customer</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    I want to order meals and food packages
+                                  </div>
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                  <RadioGroupItem value="vendor" />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer flex-1">
+                                  <div className="font-medium">Vendor</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    I want to sell meals and food packages
+                                  </div>
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="termsAccepted"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-normal cursor-pointer">
+                              I agree to the{" "}
+                              <Link to="/terms" className="text-mealstock-green underline">
+                                Terms of Service
+                              </Link>{" "}
+                              and{" "}
+                              <Link to="/privacy-policy" className="text-mealstock-green underline">
+                                Privacy Policy
+                              </Link>
+                            </FormLabel>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const tabsList = document.querySelector('[role="tablist"]');
+                        const accountTab = tabsList?.querySelector('[value="account"]');
+                        if (accountTab instanceof HTMLElement) {
+                          accountTab.click();
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      Continue
+                    </Button>
+                  </TabsContent>
+                  
                   <TabsContent value="account" className="space-y-4">
                     {/* Rearranged form fields for better mobile experience */}
                     <div className="space-y-4">
@@ -271,102 +358,15 @@ const Register = () => {
                       />
                     </div>
                     
-                    <Button
-                      type="button"
-                      onClick={() => form.trigger(["name", "email", "phone", "password"]).then(isValid => {
-                        if (isValid) {
-                          const tabsList = document.querySelector('[role="tablist"]');
-                          const accountTypeTab = tabsList?.querySelector('[value="accountType"]');
-                          if (accountTypeTab instanceof HTMLElement) {
-                            accountTypeTab.click();
-                          }
-                        }
-                      })}
-                      className="w-full"
-                    >
-                      Continue
-                    </Button>
-                  </TabsContent>
-                  
-                  <TabsContent value="accountType" className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="accountType"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel>Account Type</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              className="flex flex-col space-y-3"
-                            >
-                              <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <RadioGroupItem value="customer" />
-                                </FormControl>
-                                <FormLabel className="font-normal cursor-pointer flex-1">
-                                  <div className="font-medium">Customer</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    I want to order meals and food packages
-                                  </div>
-                                </FormLabel>
-                              </FormItem>
-                              <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <RadioGroupItem value="vendor" />
-                                </FormControl>
-                                <FormLabel className="font-normal cursor-pointer flex-1">
-                                  <div className="font-medium">Vendor</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    I want to sell meals and food packages
-                                  </div>
-                                </FormLabel>
-                              </FormItem>
-                            </RadioGroup>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="termsAccepted"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-sm font-normal cursor-pointer">
-                              I agree to the{" "}
-                              <Link to="/terms" className="text-mealstock-green underline">
-                                Terms of Service
-                              </Link>{" "}
-                              and{" "}
-                              <Link to="/privacy-policy" className="text-mealstock-green underline">
-                                Privacy Policy
-                              </Link>
-                            </FormLabel>
-                            <FormMessage />
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                    
                     <div className="flex gap-3">
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => {
                           const tabsList = document.querySelector('[role="tablist"]');
-                          const accountTab = tabsList?.querySelector('[value="account"]');
-                          if (accountTab instanceof HTMLElement) {
-                            accountTab.click();
+                          const accountTypeTab = tabsList?.querySelector('[value="accountType"]');
+                          if (accountTypeTab instanceof HTMLElement) {
+                            accountTypeTab.click();
                           }
                         }}
                       >
