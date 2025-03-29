@@ -20,9 +20,8 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true }) => {
     lg: 24
   };
 
-  // Colors updated to match "chowstack" instead of "mealstock"
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <div className={`relative ${dimensions[size]} flex items-center justify-center rounded-full bg-mealstock-cream`}>
         {/* Logo base */}
         <div className="absolute inset-0 bg-mealstock-green rounded-full opacity-20"></div>
@@ -47,9 +46,9 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true }) => {
       </div>
       
       {withText && (
-        <div className="text-xl md:text-2xl font-bold text-mealstock-green">
+        <span className="text-xl md:text-2xl font-bold text-mealstock-green">
           ChowStack
-        </div>
+        </span>
       )}
     </div>
   );

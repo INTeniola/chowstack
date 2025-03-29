@@ -46,92 +46,92 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-background border-b border-border py-2.5">
-      <div className="container-custom flex flex-wrap items-center justify-between mx-auto">
+    <nav className="bg-background border-b border-border py-2.5 sticky top-0 z-50">
+      <div className="container-custom flex flex-wrap items-center justify-between mx-auto px-4">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
             <Logo size="md" withText={true} />
           </Link>
-          <div className="ml-4 md:hidden">
+        </div>
+        
+        <div className="flex items-center md:order-2 gap-2">
+          <NotificationBell />
+            
+          {user || vendor ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://github.com/shadcn.png" alt="user-avatar"/>
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    {user && <span className="text-sm font-medium leading-none">{user.email}</span>}
+                    {vendor && <span className="text-sm font-medium leading-none">{vendor.email}</span>}
+                    <span className="text-xs leading-none text-muted-foreground">
+                      {user ? 'Customer' : 'Vendor'}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate(user ? '/profile' : '/vendor/profile')}>
+                  Profile
+                </DropdownMenuItem>
+                {vendor && (
+                  <DropdownMenuItem onClick={() => navigate('/vendor/dashboard')}>
+                    Dashboard
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate(user ? '/orders' : '/vendor/orders')}>
+                  Orders
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline" className="mr-2">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button>
+                  Register
+                </Button>
+              </Link>
+            </>
+          )}
+            
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label="Toggle theme"
+          >
+            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+          
+          {/* Mobile menu trigger moved to the right edge */}
+          <div className="md:hidden">
             <MobileMenu />
           </div>
         </div>
         
-        <div className="flex items-center md:order-2">
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            
-            {user || vendor ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://github.com/shadcn.png" alt="user-avatar"/>
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      {user && <span className="text-sm font-medium leading-none">{user.email}</span>}
-                      {vendor && <span className="text-sm font-medium leading-none">{vendor.email}</span>}
-                      <span className="text-xs leading-none text-muted-foreground">
-                        {user ? 'Customer' : 'Vendor'}
-                      </span>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate(user ? '/profile' : '/vendor/profile')}>
-                    Profile
-                  </DropdownMenuItem>
-                  {vendor && (
-                    <DropdownMenuItem onClick={() => navigate('/vendor/dashboard')}>
-                      Dashboard
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate(user ? '/orders' : '/vendor/orders')}>
-                    Orders
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="outline" className="mr-2">
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button>
-                    Register
-                  </Button>
-                </Link>
-              </>
-            )}
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-            >
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </div>
-        </div>
-        
-        <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+        <div className="hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
           <ul className="flex flex-col p-4 mt-4 rounded-lg md:flex-row md:space-x-8 md:mt-0 md:font-medium md:border-0 bg-background">
             <li>
               <Link to="/" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0" aria-current="page">Home</Link>
