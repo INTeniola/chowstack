@@ -10,11 +10,15 @@ export interface User {
   name: string;
   role: 'customer' | 'vendor' | 'admin';
   address?: string;
+  avatarUrl?: string;
   dietaryPreferences?: Record<string, any>;
   businessInfo?: {
     businessName?: string;
     businessAddress?: string;
     description?: string;
+    logoUrl?: string;
+    coverImageUrl?: string;
+    verificationDocUrl?: string;
   };
   onboardingCompleted?: boolean;
 }
@@ -37,6 +41,7 @@ export const transformUser = (supabaseUser: SupabaseUser): User => {
       ? 'admin' 
       : (supabaseUser.user_metadata?.is_vendor ? 'vendor' : 'customer'),
     address: supabaseUser.user_metadata?.address || '',
+    avatarUrl: supabaseUser.user_metadata?.avatar_url || '',
     dietaryPreferences: supabaseUser.user_metadata?.dietary_preferences,
     businessInfo: supabaseUser.user_metadata?.business_info,
     onboardingCompleted: supabaseUser.user_metadata?.onboarding_completed || false
@@ -54,6 +59,7 @@ export const authUtils = {
       if (updates.name) metadataUpdates.full_name = updates.name;
       if (updates.phone) metadataUpdates.phone_number = updates.phone;
       if (updates.address) metadataUpdates.address = updates.address;
+      if (updates.avatarUrl !== undefined) metadataUpdates.avatar_url = updates.avatarUrl;
       if (updates.dietaryPreferences) metadataUpdates.dietary_preferences = updates.dietaryPreferences;
       if (updates.businessInfo) metadataUpdates.business_info = updates.businessInfo;
       if (updates.onboardingCompleted !== undefined) metadataUpdates.onboarding_completed = updates.onboardingCompleted;
@@ -71,6 +77,7 @@ export const authUtils = {
       if (updates.name) dbUpdates.full_name = updates.name;
       if (updates.phone) dbUpdates.phone_number = updates.phone;
       if (updates.address) dbUpdates.address = updates.address;
+      if (updates.avatarUrl !== undefined) dbUpdates.avatar_url = updates.avatarUrl;
       if (updates.dietaryPreferences) dbUpdates.dietary_preferences = updates.dietaryPreferences;
       
       // Also update the users table record

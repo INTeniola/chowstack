@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { ImageUpload } from '@/components/uploads/ImageUpload';
+import { Separator } from '@/components/ui/separator';
 
 export function ProfileSettings() {
   const { user, updateUserProfile } = useAuth();
@@ -14,7 +16,8 @@ export function ProfileSettings() {
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    address: ''
+    address: user?.address || '',
+    avatar: user?.avatarUrl || ''
   });
   
   const [isLoading, setIsLoading] = useState(false);
@@ -32,12 +35,18 @@ export function ProfileSettings() {
     try {
       const success = await updateUserProfile({
         name: formData.name,
-        phone: formData.phone
+        phone: formData.phone,
+        address: formData.address,
+        avatarUrl: formData.avatar
       });
       
       if (!success) {
         throw new Error("Failed to update profile");
       }
+      
+      toast.success("Profile updated", {
+        description: "Your profile information has been saved."
+      });
     } catch (error) {
       toast.error("Update failed", {
         description: (error as Error).message
@@ -45,6 +54,10 @@ export function ProfileSettings() {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleImageUploaded = (url: string) => {
+    setFormData(prev => ({ ...prev, avatar: url }));
   };
   
   if (!user) {
@@ -61,19 +74,24 @@ export function ProfileSettings() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src="https://github.com/shadcn.png" alt={user.name || 'User'} />
-          <AvatarFallback className="text-2xl">
-            {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
-          </AvatarFallback>
-        </Avatar>
+        <ImageUpload
+          onImageUploaded={handleImageUploaded}
+          initialImage={formData.avatar}
+          bucketType="avatar"
+          shape="circle"
+          size="lg"
+          showLabel={true}
+          label="Profile Photo"
+        />
         
-        <div className="flex-1">
+        <div className="flex-1 text-center sm:text-left">
           <h2 className="text-xl font-semibold mb-1">{user.name || 'User'}</h2>
           <p className="text-muted-foreground">{user.email}</p>
           <p className="text-sm mt-2">Member since: {new Date().toLocaleDateString()}</p>
         </div>
       </div>
+      
+      <Separator />
       
       <Card>
         <CardContent className="pt-6">
