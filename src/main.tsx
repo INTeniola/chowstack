@@ -12,6 +12,10 @@ import { AuthProvider } from './hooks/useAuth';
 import { VendorAuthProvider } from './hooks/useVendorAuth';
 import { ConnectivityProvider } from './contexts/ConnectivityContext';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import { initSentry } from './lib/sentry';
+
+// Initialize Sentry
+initSentry();
 
 const queryClient = new QueryClient({
   defaultOptions: {

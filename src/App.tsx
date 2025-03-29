@@ -11,6 +11,7 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 import Notifications from "./pages/Notifications";
+import AdminDashboard from "./pages/AdminDashboard";
 import { OfflineIndicator } from "./components/ui/offline-indicator";
 import { useConnectivity } from "./contexts/ConnectivityContext";
 
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
