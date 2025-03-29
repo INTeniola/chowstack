@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -47,6 +46,7 @@ const Register = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState("accountType");
   
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -118,6 +118,21 @@ const Register = () => {
     return "bg-green-500";
   };
 
+  const handleContinueClick = () => {
+    const termsAccepted = form.getValues("termsAccepted");
+    
+    if (!termsAccepted) {
+      form.setError("termsAccepted", { 
+        message: "You must accept the Terms of Service" 
+      });
+      return;
+    }
+    
+    form.clearErrors("termsAccepted");
+    
+    setActiveTab("account");
+  };
+
   return (
     <>
       <Navbar />
@@ -140,7 +155,7 @@ const Register = () => {
               </div>
             )}
             
-            <Tabs defaultValue="accountType" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="accountType">Account Type</TabsTrigger>
                 <TabsTrigger value="account">Account Information</TabsTrigger>
@@ -220,13 +235,7 @@ const Register = () => {
                     
                     <Button
                       type="button"
-                      onClick={() => {
-                        const tabsList = document.querySelector('[role="tablist"]');
-                        const accountTab = tabsList?.querySelector('[value="account"]');
-                        if (accountTab instanceof HTMLElement) {
-                          accountTab.click();
-                        }
-                      }}
+                      onClick={handleContinueClick}
                       className="w-full"
                     >
                       Continue
@@ -234,7 +243,6 @@ const Register = () => {
                   </TabsContent>
                   
                   <TabsContent value="account" className="space-y-4">
-                    {/* Rearranged form fields for better mobile experience */}
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
@@ -362,13 +370,7 @@ const Register = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
-                          const tabsList = document.querySelector('[role="tablist"]');
-                          const accountTypeTab = tabsList?.querySelector('[value="accountType"]');
-                          if (accountTypeTab instanceof HTMLElement) {
-                            accountTypeTab.click();
-                          }
-                        }}
+                        onClick={() => setActiveTab("accountType")}
                       >
                         Back
                       </Button>
