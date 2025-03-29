@@ -29,7 +29,7 @@ const Index = () => {
           <div className="container-custom">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-mealstock-brown mb-4">
-                How MealStock Works
+                How ChowStack Works
               </h2>
               <p className="text-lg text-mealstock-brown/80 max-w-2xl mx-auto">
                 Get delicious meals delivered in bulk in just a few simple steps.

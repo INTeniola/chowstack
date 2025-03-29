@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UtensilsCrossed, ShoppingBag } from 'lucide-react';
+import { Fork, UtensilsCrossed } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -20,32 +20,35 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true }) => {
     lg: 24
   };
 
+  // Colors updated to match "chowstack" instead of "mealstock"
   return (
     <div className="flex items-center gap-2">
       <div className={`relative ${dimensions[size]} flex items-center justify-center rounded-full bg-mealstock-cream`}>
         {/* Logo base */}
         <div className="absolute inset-0 bg-mealstock-green rounded-full opacity-20"></div>
         
-        {/* Food container icon */}
-        <div className="absolute bottom-0 left-0 transform translate-x-1 translate-y-1">
-          <ShoppingBag 
-            size={iconSize[size]} 
-            className="text-mealstock-green"
-          />
+        {/* "C" shape - curved like pasta */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-3/4 h-3/4 border-4 border-mealstock-orange rounded-full border-r-0"></div>
         </div>
         
-        {/* Utensils icon */}
-        <div className="absolute top-0 right-0 transform -translate-x-1 -translate-y-1">
-          <UtensilsCrossed 
+        {/* "S" shape - curved like pasta */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-1/2 h-1/2 border-4 border-mealstock-green rounded-full border-l-transparent border-b-transparent rotate-45"></div>
+        </div>
+        
+        {/* Fork icon for pasta feel */}
+        <div className="absolute -bottom-1 -right-1 transform rotate-45">
+          <Fork 
             size={iconSize[size]} 
-            className="text-mealstock-orange"
+            className="text-mealstock-green"
           />
         </div>
       </div>
       
       {withText && (
         <div className="text-xl md:text-2xl font-bold text-mealstock-green">
-          MealStock
+          ChowStack
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ import MealPackageCardOptimized from '@/components/MealPackageCardOptimized';
 import VendorCard from '@/components/VendorCard';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMealPackages, fetchVendors, fetchWeeklySpecials } from '@/utils/apiUtils';
 import { useConnectivity } from '@/contexts/ConnectivityContext';
@@ -15,6 +16,7 @@ import { WifiOff, AlertTriangle, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OfflineIndicator } from '@/components/ui/offline-indicator';
 import { useImageOptimization } from '@/hooks/use-image-optimization';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Discovery = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +29,7 @@ const Discovery = () => {
   
   const { isOnline, connectionQuality, lowBandwidthMode } = useConnectivity();
   const { shouldOptimizeImages } = useImageOptimization();
+  const isMobile = useIsMobile();
   
   const staleTime = connectionQuality === 'slow' || connectionQuality === 'poor' 
     ? 1000 * 60 * 30 // 30 minutes 
@@ -157,8 +160,8 @@ const Discovery = () => {
         {(!lowBandwidthMode) && (
           <section className="py-8">
             <div className="container-custom">
-              <h2 className="text-2xl font-bold text-mealstock-brown mb-6">
-                Weekly Specials
+              <h2 className="text-2xl font-bold text-mealstock-brown mb-6 flex justify-between items-center">
+                <span>Weekly Specials</span>
               </h2>
               
               {loadingSpecials ? (
@@ -168,15 +171,25 @@ const Discovery = () => {
                   ))}
                 </div>
               ) : (
-                <ScrollArea className="w-full whitespace-nowrap pb-4">
-                  <div className="flex space-x-4">
-                    {weeklySpecials.map((special) => (
-                      <div key={special.id} className="w-80 flex-shrink-0">
-                        <MealComponent mealPackage={special} featured />
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+                <div className="relative">
+                  <Carousel className="w-full">
+                    <CarouselContent className="-ml-2 md:-ml-4">
+                      {weeklySpecials.map((special) => (
+                        <CarouselItem key={special.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                          <div className="h-full">
+                            <MealComponent mealPackage={special} featured />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    {!isMobile && (
+                      <>
+                        <CarouselPrevious className="left-0" />
+                        <CarouselNext className="right-0" />
+                      </>
+                    )}
+                  </Carousel>
+                </div>
               )}
             </div>
           </section>

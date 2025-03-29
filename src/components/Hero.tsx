@@ -1,23 +1,65 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem
+} from '@/components/ui/carousel';
+import { ResponsiveImage } from '@/components/uploads/ResponsiveImage';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HeroProps {
   onOpenAuth: () => void;
 }
 
+// Nigerian food images for the slideshow
+const NIGERIAN_FOODS = [
+  {
+    src: "https://images.unsplash.com/photo-1647102398925-e30527aee930",
+    alt: "Nigerian Jollof Rice"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1640527051371-1f7b5c32a062",
+    alt: "Egusi Soup with Pounded Yam"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1643553210055-8416a305c7e9",
+    alt: "Suya (Nigerian Spiced Skewers)"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1667489021871-7d8923f1033e",
+    alt: "Moin Moin (Steamed Bean Pudding)"
+  }
+];
+
 const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const isMobile = useIsMobile();
+
+  // Auto rotate images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === NIGERIAN_FOODS.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <section className="relative py-16 md:py-24 bg-gradient-to-b from-mealstock-cream to-white overflow-hidden">
+    <section className="relative py-12 md:py-20 bg-gradient-to-b from-mealstock-cream to-white overflow-hidden">
       <div className="container-custom relative z-10">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-mealstock-brown">
-              Bulk Meal Delivery for Busy Nigerians
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-mealstock-brown">
+              Your Weekly Feasts, <br className="hidden md:block" />
+              One Delivery Away
             </h1>
-            <p className="text-lg md:text-xl text-mealstock-brown/80">
-              Stock up on delicious, ready-to-heat meals delivered in bulk. Save time, money, and enjoy home-style cooking without the hassle.
+            <p className="text-lg text-mealstock-brown/80">
+              Stock your fridge with authentic Nigerian cuisine, delivered in bulk. Save time, reduce costs, and enjoy home-style cooking without the daily hassle.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
@@ -27,13 +69,6 @@ const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
               >
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-mealstock-green text-mealstock-green hover:bg-mealstock-green hover:text-white"
-                size="lg"
-              >
-                View Menu
               </Button>
             </div>
             
@@ -50,23 +85,32 @@ const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
           </div>
           
           <div className="relative">
-            <div className="aspect-square rounded-full bg-mealstock-lightGreen absolute -right-10 -top-10 w-48 h-48 blur-3xl opacity-50"></div>
-            <div className="aspect-square rounded-full bg-mealstock-lightOrange absolute -left-10 -bottom-10 w-48 h-48 blur-3xl opacity-50"></div>
+            <div className="aspect-square rounded-full bg-mealstock-lightGreen absolute -right-10 -top-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
+            <div className="aspect-square rounded-full bg-mealstock-lightOrange absolute -left-10 -bottom-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
             
-            {/* Placeholder for hero image - replace with actual image when available */}
-            <div className="bg-mealstock-orange/10 rounded-2xl p-2 border border-mealstock-orange/20 relative z-10">
-              <div className="bg-gradient-to-br from-mealstock-orange/20 to-mealstock-green/20 aspect-video rounded-xl flex items-center justify-center">
-                <div className="text-center p-8">
-                  <div className="inline-block p-4 bg-white rounded-full mb-4">
-                    <div className="w-16 h-16 rounded-full bg-mealstock-orange flex items-center justify-center">
-                      <span className="text-white text-3xl">🍲</span>
-                    </div>
-                  </div>
-                  <p className="text-mealstock-brown font-medium">
-                    Hero image placeholder - delicious food containers stacked and ready to go
-                  </p>
-                </div>
-              </div>
+            {/* Nigerian Food Slideshow */}
+            <div className="bg-mealstock-orange/10 rounded-2xl p-2 border border-mealstock-orange/20 relative z-10 overflow-hidden">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {NIGERIAN_FOODS.map((food, index) => (
+                    <CarouselItem key={index}>
+                      <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+                        <ResponsiveImage
+                          src={food.src}
+                          alt={food.alt}
+                          className="w-full h-full object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                          <p className="text-white font-medium text-sm md:text-base">
+                            {food.alt}
+                          </p>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
             </div>
           </div>
         </div>
