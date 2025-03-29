@@ -63,10 +63,10 @@ export const ActiveUsers: React.FC<ActiveUsersProps> = ({
           return;
         }
         
-        // Get user profiles
+        // Get user profiles - Note: Check if the field exists in your users table
         const { data: userProfiles, error: profilesError } = await supabase
           .from('users')
-          .select('id, full_name, avatar_url')
+          .select('id, full_name')
           .in('id', filteredUserIds);
           
         if (profilesError) throw profilesError;
@@ -76,7 +76,8 @@ export const ActiveUsers: React.FC<ActiveUsersProps> = ({
           const mappedUsers: User[] = userProfiles.map(profile => ({
             id: profile.id,
             name: profile.full_name || 'Unknown User',
-            avatar_url: profile.avatar_url
+            // Since avatar_url doesn't exist in the users table, we'll use initials instead
+            avatar_url: undefined
           }));
           setUsers(mappedUsers);
         }

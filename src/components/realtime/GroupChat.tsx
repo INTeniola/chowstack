@@ -96,17 +96,26 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
           const messagesWithSenders = await Promise.all(
             data.map(async (msg) => {
               try {
-                // Get sender info
+                // Get sender info from users table (not profiles)
                 const { data: senderData, error: senderError } = await supabase
                   .from('users')
-                  .select('full_name, avatar_url')
+                  .select('id, full_name')
                   .eq('id', msg.sender_id)
                   .single();
                 
+                if (senderError) {
+                  console.error('Error fetching sender info:', senderError);
+                  return {
+                    ...msg,
+                    senderName: 'Unknown User',
+                    senderAvatar: undefined
+                  };
+                }
+                
                 return {
                   ...msg,
-                  senderName: senderError ? 'Unknown User' : (senderData?.full_name || 'Unknown User'),
-                  senderAvatar: senderError ? undefined : senderData?.avatar_url
+                  senderName: senderData?.full_name || 'Unknown User',
+                  senderAvatar: undefined // We don't have avatar_url in the users table
                 };
               } catch (err) {
                 console.error('Error fetching sender info:', err);
@@ -148,15 +157,28 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
           try {
             const { data, error } = await supabase
               .from('users')
-              .select('full_name, avatar_url')
+              .select('id, full_name')
               .eq('id', payload.new.sender_id)
               .single();
               
-            if (!error && data) {
+            if (error) {
+              console.error('Error fetching sender info:', error);
+              const message = {
+                ...payload.new,
+                senderName: 'Unknown User',
+                senderAvatar: undefined
+              };
+              
+              setMessages(prev => [...prev, message]);
+              scrollToBottom();
+              return;
+            }
+            
+            if (data) {
               const message = {
                 ...payload.new,
                 senderName: data.full_name || 'Unknown User',
-                senderAvatar: data.avatar_url
+                senderAvatar: undefined // No avatar_url in users table
               };
               
               setMessages(prev => [...prev, message]);

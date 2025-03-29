@@ -203,7 +203,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       isDriverMessage
     );
     
-    // Converting Promise<string> to Promise<void>
+    // The function returns a Promise<string> but our interface expects Promise<void>
+    // so we just ignore the returned value
   };
   
   return (

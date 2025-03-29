@@ -124,9 +124,10 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const channel = supabase.channel(`table-changes:${table}`);
     
+    // Fix: The proper way to subscribe to postgres changes
     channel.on(
       'postgres_changes',
-      {
+      { 
         event: event,
         schema: 'public',
         table: table
