@@ -1,50 +1,12 @@
+
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useVendorAuth } from '@/hooks/useVendorAuth';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Moon, Sun, Settings } from 'lucide-react';
-import { useTheme } from '@/components/ui/theme-provider';
+import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import MobileMenu from './MobileMenu';
+
 const Navbar: React.FC = () => {
-  const {
-    user,
-    signOut
-  } = useAuth();
-  const {
-    vendor,
-    logout
-  } = useVendorAuth();
-  const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const {
-    setTheme,
-    theme
-  } = useTheme();
-  const handleSignOut = async () => {
-    if (user) {
-      await signOut();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out."
-      });
-      navigate('/login');
-    } else if (vendor) {
-      await logout();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out."
-      });
-      navigate('/vendor/login');
-    }
-  };
-  return <nav className="bg-background border-b border-border py-2.5 sticky top-0 z-50">
+  return (
+    <nav className="bg-background border-b border-border py-2.5 sticky top-0 z-50">
       <div className="container-custom flex flex-wrap items-center justify-between mx-auto px-4">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
@@ -52,64 +14,7 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
         
-        <div className="flex items-center md:order-2 gap-2">
-          {user || vendor ? <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://github.com/shadcn.png" alt="user-avatar" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    {user && <span className="text-sm font-medium leading-none">{user.email}</span>}
-                    {vendor && <span className="text-sm font-medium leading-none">{vendor.email}</span>}
-                    <span className="text-xs leading-none text-muted-foreground">
-                      {user ? 'Customer' : 'Vendor'}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate(user ? '/profile' : '/vendor/profile')}>
-                  Profile
-                </DropdownMenuItem>
-                {vendor && <DropdownMenuItem onClick={() => navigate('/vendor/dashboard')}>
-                    Dashboard
-                  </DropdownMenuItem>}
-                <DropdownMenuItem onClick={() => navigate('/settings')}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate(user ? '/orders' : '/vendor/orders')}>
-                  Orders
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> : <>
-              <Link to="/login">
-                <Button variant="outline" className="mr-2 mx-[20px]">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button className="mx-0">
-                  Register
-                </Button>
-              </Link>
-            </>}
-            
-          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme" className="px-0 my-[10px] mx-[20px]">
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-          
+        <div className="flex items-center md:order-2">
           <div className="md:hidden">
             <MobileMenu />
           </div>
@@ -132,6 +37,8 @@ const Navbar: React.FC = () => {
           </ul>
         </div>
       </div>
-    </nav>;
+    </nav>
+  );
 };
+
 export default Navbar;

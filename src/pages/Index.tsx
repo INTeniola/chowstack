@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -12,10 +11,47 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <Hero />
+        <section className="relative overflow-hidden bg-gradient-to-b from-mealstock-cream/30 to-white py-16 md:py-24">
+          <div className="container-custom relative z-10">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="text-center md:text-left">
+                <h1 className="text-4xl md:text-6xl font-bold text-mealstock-brown mb-6 leading-tight">
+                  Delicious Food, 
+                  <span className="text-mealstock-orange block">Delivered in Bulk</span>
+                </h1>
+                <p className="text-lg md:text-xl text-mealstock-brown/80 mb-8 max-w-lg mx-auto md:mx-0">
+                  Get your weekly meals planned, cooked, and delivered. Save time and eat well with ChowStack.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                  <Button size="lg" className="bg-mealstock-orange hover:bg-mealstock-orange/90 text-white" asChild>
+                    <Link to="/discovery">
+                      Explore Our Menu
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link to="/meal-planner">
+                      Plan Your Week
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-mealstock-orange/10 to-mealstock-green/10 rounded-full blur-3xl"></div>
+                <img 
+                  src="/assets/hero-food.png" 
+                  alt="Delicious meals" 
+                  className="relative z-10 w-full max-w-lg mx-auto rounded-2xl shadow-2xl"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-mealstock-orange/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-mealstock-green/5 rounded-full blur-3xl"></div>
+        </section>
+        
         <Features />
         
-        {/* How It Works Section */}
         <section id="how-it-works" className="py-16 md:py-24 bg-mealstock-cream/30">
           <div className="container-custom">
             <div className="text-center mb-16">
@@ -64,7 +100,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Pricing Section */}
         <section id="pricing" className="py-16 md:py-24 bg-white">
           <div className="container-custom">
             <div className="text-center mb-16">
