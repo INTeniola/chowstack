@@ -60,7 +60,7 @@ const Hero: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-                className="btn-primary"
+                className="bg-mealstock-orange hover:bg-mealstock-orange/90 text-white"
                 size="lg"
                 asChild
               >
@@ -74,7 +74,13 @@ const Hero: React.FC = () => {
             <div className="pt-4 flex items-center space-x-4">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white" />
+                  <div key={i} className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white overflow-hidden">
+                    <img 
+                      src={`https://randomuser.me/api/portraits/men/${i + 10}.jpg`} 
+                      alt="Customer" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 ))}
               </div>
               <p className="text-sm text-mealstock-brown/80">
@@ -85,8 +91,8 @@ const Hero: React.FC = () => {
           
           {/* Nigerian Food Slideshow */}
           <div className="relative">
-            <div className="aspect-square rounded-full bg-mealstock-lightGreen absolute -right-10 -top-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
-            <div className="aspect-square rounded-full bg-mealstock-lightOrange absolute -left-10 -bottom-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
+            <div className="absolute inset-0 rounded-full bg-mealstock-lightGreen -right-10 -top-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
+            <div className="absolute inset-0 rounded-full bg-mealstock-lightOrange -left-10 -bottom-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
             
             <div className="bg-mealstock-orange/10 rounded-2xl p-2 border border-mealstock-orange/20 relative z-10 overflow-hidden">
               <Carousel className="w-full">
@@ -94,11 +100,10 @@ const Hero: React.FC = () => {
                   {NIGERIAN_FOODS.map((food, index) => (
                     <CarouselItem key={index}>
                       <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                        <ResponsiveImage
+                        <img
                           src={food.src}
                           alt={food.alt}
                           className="w-full h-full object-cover"
-                          sizes="(max-width: 768px) 100vw, 50vw"
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                           <p className="text-white font-medium text-sm md:text-base">
@@ -113,6 +118,18 @@ const Hero: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Decorative elements */}
+      <div className="absolute hidden md:block left-5 top-1/4 w-20 h-20 text-mealstock-orange opacity-20">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,10.5A1.5,1.5 0 0,1 13.5,12A1.5,1.5 0 0,1 12,13.5A1.5,1.5 0 0,1 10.5,12A1.5,1.5 0 0,1 12,10.5Z" />
+        </svg>
+      </div>
+      <div className="absolute hidden md:block right-10 bottom-1/3 w-16 h-16 text-mealstock-green opacity-20">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,10.5A1.5,1.5 0 0,1 13.5,12A1.5,1.5 0 0,1 12,13.5A1.5,1.5 0 0,1 10.5,12A1.5,1.5 0 0,1 12,10.5Z" />
+        </svg>
       </div>
     </section>
   );

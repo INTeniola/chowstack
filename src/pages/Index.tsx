@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -11,16 +12,30 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-gradient-to-b from-mealstock-cream/30 to-white py-16 md:py-24">
+        <Hero />
+        
+        <section className="relative overflow-hidden bg-gradient-to-b from-white to-mealstock-cream/30 py-16 md:py-24">
           <div className="container-custom relative z-10">
             <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-mealstock-orange/10 to-mealstock-green/10 rounded-full blur-3xl"></div>
+                <img 
+                  src="/assets/hero-food.png" 
+                  alt="Delicious meals" 
+                  className="relative z-10 w-full max-w-lg mx-auto rounded-2xl shadow-2xl"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1617524455170-0e150ed7b4e6";
+                    e.currentTarget.onerror = null;
+                  }}
+                />
+              </div>
               <div className="text-center md:text-left">
-                <h1 className="text-4xl md:text-6xl font-bold text-mealstock-brown mb-6 leading-tight">
-                  Delicious Food, 
-                  <span className="text-mealstock-orange block">Delivered in Bulk</span>
-                </h1>
+                <h2 className="text-3xl md:text-4xl font-bold text-mealstock-brown mb-6 leading-tight">
+                  Bulk Meals,
+                  <span className="text-mealstock-orange block">Fresh Every Time</span>
+                </h2>
                 <p className="text-lg md:text-xl text-mealstock-brown/80 mb-8 max-w-lg mx-auto md:mx-0">
-                  Get your weekly meals planned, cooked, and delivered. Save time and eat well with ChowStack.
+                  All our meals are prepared fresh, properly packaged, and delivered with instructions on how to store and reheat.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                   <Button size="lg" className="bg-mealstock-orange hover:bg-mealstock-orange/90 text-white" asChild>
@@ -28,20 +43,7 @@ const Index = () => {
                       Explore Our Menu
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild>
-                    <Link to="/meal-planner">
-                      Plan Your Week
-                    </Link>
-                  </Button>
                 </div>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-mealstock-orange/10 to-mealstock-green/10 rounded-full blur-3xl"></div>
-                <img 
-                  src="/assets/hero-food.png" 
-                  alt="Delicious meals" 
-                  className="relative z-10 w-full max-w-lg mx-auto rounded-2xl shadow-2xl"
-                />
               </div>
             </div>
           </div>
@@ -52,6 +54,7 @@ const Index = () => {
         
         <Features />
         
+        {/* How it works section */}
         <section id="how-it-works" className="py-16 md:py-24 bg-mealstock-cream/30">
           <div className="container-custom">
             <div className="text-center mb-16">
@@ -68,25 +71,31 @@ const Index = () => {
                 {
                   step: "01",
                   title: "Browse & Select",
-                  description: "Choose from our diverse menu of Nigerian and international dishes."
+                  description: "Choose from our diverse menu of Nigerian and international dishes.",
+                  icon: "🍲"
                 },
                 {
                   step: "02",
                   title: "Schedule Delivery",
-                  description: "Pick your preferred delivery day and time slot."
+                  description: "Pick your preferred delivery day and time slot.",
+                  icon: "🚚"
                 },
                 {
                   step: "03",
                   title: "Store & Reheat",
-                  description: "Store your meals and enjoy them whenever you want throughout the week."
+                  description: "Store your meals and enjoy them whenever you want throughout the week.",
+                  icon: "♨️"
                 }
               ].map((item, index) => (
                 <div 
                   key={index} 
-                  className="bg-white p-8 rounded-xl border border-mealstock-green/10 relative"
+                  className="bg-white p-8 rounded-xl border border-mealstock-green/10 relative hover:shadow-md transition-shadow"
                 >
                   <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-mealstock-orange flex items-center justify-center text-white font-bold">
                     {item.step}
+                  </div>
+                  <div className="text-center text-4xl mb-4 mt-4">
+                    {item.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-mealstock-brown mb-2 mt-4 text-center">
                     {item.title}
@@ -100,6 +109,7 @@ const Index = () => {
           </div>
         </section>
         
+        {/* Pricing section */}
         <section id="pricing" className="py-16 md:py-24 bg-white">
           <div className="container-custom">
             <div className="text-center mb-16">
