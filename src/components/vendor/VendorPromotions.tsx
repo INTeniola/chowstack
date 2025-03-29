@@ -21,14 +21,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Calendar as CalendarIcon,
   PlusCircle,
   Edit,
   Trash2,
   Tag,
   Percent,
   Users,
-  Calendar,
+  Calendar as CalendarIcon,
   Package
 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -316,7 +315,7 @@ const VendorPromotions: React.FC<VendorPromotionsProps> = ({ vendor }) => {
       case 'bundle':
         return <Package className="h-5 w-5 text-amber-500" />;
       case 'special':
-        return <Calendar className="h-5 w-5 text-purple-500" />;
+        return <CalendarIcon className="h-5 w-5 text-purple-500" />;
       default:
         return null;
     }
@@ -409,7 +408,7 @@ const VendorPromotions: React.FC<VendorPromotionsProps> = ({ vendor }) => {
             <CardContent className="p-6 pt-2 space-y-4">
               <div className="text-sm text-muted-foreground space-y-2">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   <span>{formatDateRange(promo.startDate, promo.endDate)}</span>
                 </div>
                 
@@ -617,6 +616,7 @@ const VendorPromotions: React.FC<VendorPromotionsProps> = ({ vendor }) => {
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                             initialFocus
+                            className="pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>
@@ -657,6 +657,7 @@ const VendorPromotions: React.FC<VendorPromotionsProps> = ({ vendor }) => {
                               (form.getValues('startDate') && date < form.getValues('startDate'))
                             }
                             initialFocus
+                            className="pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>
