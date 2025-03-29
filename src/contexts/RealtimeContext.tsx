@@ -124,16 +124,19 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const channel = supabase.channel(`table-changes:${table}`);
     
-    // Fix: The proper way to subscribe to postgres changes
-    channel.on(
-      'postgres_changes',
-      { 
-        event: event,
-        schema: 'public',
-        table: table
-      },
-      (payload) => callback(payload as any)
-    ).subscribe();
+    // Fix: Using the correct type annotation for postgres_changes
+    // The correct way is to cast the callback parameter type
+    channel
+      .on(
+        'postgres_changes', 
+        { 
+          event: event,
+          schema: 'public',
+          table: table
+        } as any,  // Use type assertion to bypass the type checking
+        (payload: any) => callback(payload)
+      )
+      .subscribe();
 
     setChannels(prev => [...prev, channel]);
 
