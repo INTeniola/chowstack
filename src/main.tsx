@@ -11,6 +11,7 @@ import { NotificationsProvider } from './contexts/NotificationsContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { VendorAuthProvider } from './hooks/useVendorAuth';
 import { ConnectivityProvider } from './contexts/ConnectivityContext';
+import { RealtimeProvider } from './contexts/RealtimeContext';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { initSentry } from './lib/sentry';
 
@@ -46,10 +47,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <AuthProvider>
             <VendorAuthProvider>
               <ConnectivityProvider>
-                <NotificationsProvider>
-                  <App />
-                  <Toaster />
-                </NotificationsProvider>
+                <RealtimeProvider>
+                  <NotificationsProvider>
+                    <App />
+                    <Toaster />
+                  </NotificationsProvider>
+                </RealtimeProvider>
               </ConnectivityProvider>
             </VendorAuthProvider>
           </AuthProvider>

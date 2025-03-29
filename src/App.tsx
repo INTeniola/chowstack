@@ -1,3 +1,4 @@
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
@@ -14,6 +15,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { OfflineIndicator } from "./components/ui/offline-indicator";
 import { useConnectivity } from "./contexts/ConnectivityContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { BroadcastBar } from "./components/realtime/BroadcastBar";
+import { useAuth } from "./hooks/useAuth";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -36,12 +39,16 @@ import Settings from "./pages/Settings";
 
 const App = () => {
   const { isOnline, lowBandwidthMode } = useConnectivity();
+  const { user } = useAuth();
   
   return (
     <>
       <TooltipProvider>
         <Sonner />
         <div className={lowBandwidthMode ? "low-bandwidth-mode" : ""}>
+          {/* Show broadcast bar for authenticated users */}
+          {user && <BroadcastBar />}
+          
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Index />} />

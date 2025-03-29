@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      broadcasts: {
+        Row: {
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          sender_id: string
+          target_group: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          sender_id: string
+          target_group?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          sender_id?: string
+          target_group?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       community_groups: {
         Row: {
           created_at: string
@@ -193,6 +226,87 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          message: string
+          read: boolean
+          recipient_id: string | null
+          sender_id: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          message: string
+          read?: boolean
+          recipient_id?: string | null
+          sender_id: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          message?: string
+          read?: boolean
+          recipient_id?: string | null
+          sender_id?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "community_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read: boolean
+          related_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          related_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          related_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           id: string
@@ -284,6 +398,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      presence: {
+        Row: {
+          id: string
+          last_seen: string
+          location_data: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_seen?: string
+          location_data?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_seen?: string
+          location_data?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
