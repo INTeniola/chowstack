@@ -146,6 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (authData.user) {
         // Create a new user record in the public.users table
+        // Skip creation of user preferences, which is causing permission issues
         const { error: insertError } = await supabase
           .from('users')
           .insert([
@@ -162,6 +163,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
         if (insertError) {
           console.error("User record creation error:", insertError);
+          toast.error("Registration issue", {
+            description: "Account created but profile setup failed. You can update your profile later."
+          });
           // Don't fail the signup since auth record is created
         }
         
