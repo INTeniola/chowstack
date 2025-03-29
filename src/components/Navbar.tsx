@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { LogIn, UserPlus } from 'lucide-react';
 import Logo from './Logo';
 import MobileMenu from './MobileMenu';
+import { Button } from "@/components/ui/button";
 
 const Navbar: React.FC = () => {
   return (
@@ -14,7 +16,21 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
         
-        <div className="flex items-center md:order-2">
+        <div className="flex items-center md:order-2 gap-2">
+          <div className="hidden md:flex items-center space-x-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/login" className="flex items-center">
+                <LogIn className="mr-1 h-4 w-4" />
+                Login
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/register" className="flex items-center">
+                <UserPlus className="mr-1 h-4 w-4" />
+                Register
+              </Link>
+            </Button>
+          </div>
           <div className="md:hidden">
             <MobileMenu />
           </div>
