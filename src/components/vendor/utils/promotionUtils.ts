@@ -1,6 +1,6 @@
 
 import { format } from 'date-fns';
-import { Percent, Tag, Package, Calendar as CalendarIcon } from 'lucide-react';
+import { Percent, Tag, Package, Calendar } from 'lucide-react';
 import { Promotion } from '../types/promotionTypes';
 
 // Get the promo type icon
@@ -13,7 +13,7 @@ export const getPromoTypeIcon = (type: Promotion['type']) => {
     case 'bundle':
       return <Package className="h-5 w-5 text-amber-500" />;
     case 'special':
-      return <CalendarIcon className="h-5 w-5 text-purple-500" />;
+      return <Calendar className="h-5 w-5 text-purple-500" />;
     default:
       return null;
   }
