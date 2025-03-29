@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -7,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import OrderPreservationSummary from '@/components/preservation/OrderPreservationSummary';
+import { sendOrderStatusNotification, sendMealExpirationReminder } from '@/services/notificationService';
+import { useEffect } from 'react';
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
@@ -54,6 +55,44 @@ const OrderConfirmation = () => {
     tax: 540,
     total: 12740,
   };
+  
+  // Send notifications when the order is placed
+  useEffect(() => {
+    // Mock user ID
+    const userId = "current-user";
+    
+    // Send order confirmation notification
+    sendOrderStatusNotification(
+      userId,
+      orderDetails.orderId,
+      "confirmed",
+      `Your order #${orderDetails.orderId} has been confirmed and will be delivered on ${orderDetails.deliveryDate}.`
+    );
+    
+    // Schedule meal expiration reminders (in a real app this would be done server-side)
+    // For demo purposes, we're setting them up immediately
+    const scheduleExpirationReminders = async () => {
+      // Wait to avoid too many notifications at once
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Send meal expiration reminders for each item
+      for (const item of orderDetails.items) {
+        // Calculate expiry date (3-5 days from now for demo)
+        const daysUntilExpiry = 3 + Math.floor(Math.random() * 3);
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + daysUntilExpiry);
+        
+        sendMealExpirationReminder(
+          userId,
+          item.id,
+          item.name,
+          expiryDate
+        );
+      }
+    };
+    
+    scheduleExpirationReminders();
+  }, []);
   
   return (
     <div className="min-h-screen flex flex-col bg-mealstock-cream">

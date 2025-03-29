@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Vendor } from '@/hooks/useVendorAuth';
 import { toast } from '@/hooks/use-toast';
@@ -31,6 +30,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, ArrowDown, ArrowUp, Eye, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { 
+  sendOrderStatusNotification, 
+  sendDeliveryUpdateNotification 
+} from '@/services/notificationService';
 
 interface VendorOrdersProps {
   vendor: Vendor;
@@ -310,6 +313,36 @@ const VendorOrders: React.FC<VendorOrdersProps> = ({ vendor }) => {
     
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder({ ...selectedOrder, status: newStatus, updatedAt: new Date().toISOString() });
+    }
+    
+    // Send notification to customer
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      // Mock customer ID
+      const customerId = order.customerId;
+      
+      if (newStatus === 'preparing' || newStatus === 'confirmed' || newStatus === 'cancelled') {
+        sendOrderStatusNotification(
+          customerId,
+          orderId,
+          newStatus.replace('_', ' '),
+          `Your order #${orderId} is now ${newStatus.replace('_', ' ')}.`
+        );
+      } else if (newStatus === 'in_transit' || newStatus === 'ready') {
+        sendDeliveryUpdateNotification(
+          customerId,
+          orderId,
+          newStatus === 'in_transit' ? 'on the way' : 'ready for pickup',
+          newStatus === 'in_transit' ? 'Estimated delivery in 30 minutes' : undefined
+        );
+      } else if (newStatus === 'delivered') {
+        sendOrderStatusNotification(
+          customerId,
+          orderId,
+          'delivered',
+          'Your order has been delivered. Enjoy your meal!'
+        );
+      }
     }
     
     toast({

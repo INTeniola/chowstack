@@ -1,180 +1,147 @@
-
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useVendorAuth } from '@/hooks/useVendorAuth';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, ShoppingCart, Users } from 'lucide-react';
-import Logo from './Logo';
+import { useToast } from '@/hooks/use-toast';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import logo from '@/assets/mealstock-logo.png';
+import NotificationBell from './notifications/NotificationBell';
 
-interface NavbarProps {
-  onOpenAuth?: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const Navbar: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const { vendor, signOutVendor } = useVendorAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { setTheme } = useTheme();
+  const currentTheme = useTheme().theme;
   
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const handleSignOut = async () => {
+    if (user) {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      })
+      navigate('/login');
+    } else if (vendor) {
+      await signOutVendor();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      })
+      navigate('/vendor/login');
+    }
   };
-  
+
   return (
-    <header className="bg-white sticky top-0 z-40 shadow-sm">
-      <div className="container-custom mx-auto py-3 px-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="z-50">
-            <Logo size="md" />
-          </Link>
-          
-          {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-            >
-              Home
-            </Link>
-            <Link 
-              to="/discovery" 
-              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-            >
-              Discover
-            </Link>
-            <Link 
-              to="/meal-planner" 
-              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-            >
-              Meal Planner
-            </Link>
-            <Link 
-              to="/community" 
-              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-            >
-              Community
-            </Link>
-            <Link 
-              to="/how-it-works" 
-              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-            >
-              How It Works
-            </Link>
-            <Link 
-              to="/about" 
-              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-            >
-              About
-            </Link>
-          </nav>
-          
-          {/* Actions - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              className="rounded-full flex items-center" 
-              onClick={onOpenAuth}
-            >
-              <User className="h-4 w-4 mr-2" />
-              <span>Sign In</span>
-            </Button>
-            <Button 
-              className="rounded-full bg-mealstock-orange hover:bg-mealstock-orange/90 flex items-center"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              <span>Cart</span>
-            </Button>
-          </div>
-          
-          {/* Mobile Menu Button */}
-          <button 
-            onClick={toggleMenu}
-            className="md:hidden z-50"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 text-mealstock-brown" />
+    <nav className="bg-white border-b border-gray-200 py-2.5">
+      <div className="container-custom flex flex-wrap items-center justify-between mx-auto">
+        <Link to="/" className="flex items-center">
+          <img src={logo} className="h-6 mr-3 sm:h-9" alt="MealStock Logo" />
+          <span className="self-center text-xl font-semibold whitespace-nowrap">MealStock</span>
+        </Link>
+        
+        <div className="flex items-center md:order-2">
+          <div className="flex items-center gap-4">
+            {/* Add NotificationBell here */}
+            <NotificationBell />
+            
+            {user || vendor ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="https://github.com/shadcn.png" alt="user-avatar"/>
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      {user && <span className="text-sm font-medium leading-none">{user.email}</span>}
+                      {vendor && <span className="text-sm font-medium leading-none">{vendor.email}</span>}
+                      <span className="text-xs leading-none text-muted-foreground">
+                        {user ? 'Customer' : 'Vendor'}
+                      </span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate(user ? '/profile' : '/vendor/profile')}>
+                    Profile
+                  </DropdownMenuItem>
+                  {vendor && (
+                    <DropdownMenuItem onClick={() => navigate('/vendor/dashboard')}>
+                      Dashboard
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => navigate(user ? '/orders' : '/vendor/orders')}>
+                    Orders
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <Menu className="h-6 w-6 text-mealstock-brown" />
+              <>
+                <Link to="/login">
+                  <Button variant="outline" className="mr-2">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button>
+                    Register
+                  </Button>
+                </Link>
+              </>
             )}
-          </button>
-          
-          {/* Mobile Menu */}
-          <div 
-            className={`fixed inset-0 bg-white flex flex-col p-8 transform transition-transform duration-300 ease-in-out z-40 ${
-              isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-            } md:hidden`}
-          >
-            <div className="h-12 mb-8">
-              {/* Empty space for the logo and close button */}
-            </div>
-            
-            <nav className="flex flex-col space-y-6 text-center">
-              <Link 
-                to="/" 
-                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link 
-                to="/discovery" 
-                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Discover
-              </Link>
-              <Link 
-                to="/meal-planner" 
-                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Meal Planner
-              </Link>
-              <Link 
-                to="/community" 
-                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Community
-              </Link>
-              <Link 
-                to="/how-it-works" 
-                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                How It Works
-              </Link>
-              <Link 
-                to="/about" 
-                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
-            </nav>
-            
-            <div className="mt-auto flex flex-col space-y-4">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onOpenAuth && onOpenAuth();
-                }}
-              >
-                <User className="h-4 w-4 mr-2" />
-                <span>Sign In</span>
-              </Button>
-              <Button 
-                className="w-full bg-mealstock-orange hover:bg-mealstock-orange/90"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                <span>Cart</span>
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
+            >
+              <Moon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Sun className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
           </div>
         </div>
+        
+        <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+          <ul className="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:font-medium md:border-0 md:bg-white">
+            <li>
+              <Link to="/" className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0" aria-current="page">Home</Link>
+            </li>
+            <li>
+              <Link to="/discovery" className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0">Discovery</Link>
+            </li>
+            <li>
+              <Link to="/about" className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0">About</Link>
+            </li>
+            <li>
+              <Link to="/contact" className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0">Contact</Link>
+            </li>
+          </ul>
+        </div>
       </div>
-    </header>
+    </nav>
   );
 };
 
