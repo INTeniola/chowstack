@@ -11,14 +11,14 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import PreservationGuide from './PreservationGuide';
 import { Package, Info } from 'lucide-react';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface OrderPreservationSummaryProps {
   items: CartItem[];
 }
 
 const OrderPreservationSummary: React.FC<OrderPreservationSummaryProps> = ({ items }) => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   
   // Convert cart items to meal packages for the preservation guide
@@ -33,7 +33,11 @@ const OrderPreservationSummary: React.FC<OrderPreservationSummaryProps> = ({ ite
     dietaryTags: [],
     vendorId: item.vendorId,
     vendorName: item.vendorName,
-    imageUrl: item.image
+    imageUrl: item.image,
+    // Add missing required properties
+    description: `${item.name} - preservation details`,
+    singleMealPrice: item.price * 100,
+    reviewCount: 0
   }));
   
   // Query preservation guides for all meals

@@ -35,7 +35,7 @@ export const generatePreservationInstructions = async (
         },
         {
           method: 'freeze',
-          duration: { value: 2, unit: 'months' },
+          duration: { value: 60, unit: 'days' },
           tips: [
             'Divide into portion-sized containers',
             'Leave some space at the top for expansion',
@@ -82,7 +82,7 @@ export const generatePreservationInstructions = async (
         },
         {
           method: 'freeze',
-          duration: { value: 1, unit: 'months' },
+          duration: { value: 30, unit: 'days' },
           tips: [
             'Spread on a tray to cool quickly',
             'Portion into meal-sized servings',
