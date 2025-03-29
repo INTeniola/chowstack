@@ -48,33 +48,42 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          last_activity: string | null
           location_lat: number | null
           location_lng: number | null
           location_name: string | null
           member_count: number
           name: string
+          total_orders: number | null
+          total_savings: number | null
         }
         Insert: {
           created_at?: string
           created_by: string
           description?: string | null
           id?: string
+          last_activity?: string | null
           location_lat?: number | null
           location_lng?: number | null
           location_name?: string | null
           member_count?: number
           name: string
+          total_orders?: number | null
+          total_savings?: number | null
         }
         Update: {
           created_at?: string
           created_by?: string
           description?: string | null
           id?: string
+          last_activity?: string | null
           location_lat?: number | null
           location_lng?: number | null
           location_name?: string | null
           member_count?: number
           name?: string
+          total_orders?: number | null
+          total_savings?: number | null
         }
         Relationships: [
           {
@@ -116,6 +125,48 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_instructions: {
+        Row: {
+          created_at: string | null
+          id: string
+          instructions: string
+          location_notes: string | null
+          order_group_id: string | null
+          order_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          instructions: string
+          location_notes?: string | null
+          order_group_id?: string | null
+          order_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          instructions?: string
+          location_notes?: string | null
+          order_group_id?: string | null
+          order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_instructions_order_group_id_fkey"
+            columns: ["order_group_id"]
+            isOneToOne: false
+            referencedRelation: "group_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_instructions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           group_id: string
@@ -148,6 +199,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_orders: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          group_id: string
+          id: string
+          max_participants: number | null
+          min_participants: number
+          order_deadline: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          group_id: string
+          id?: string
+          max_participants?: number | null
+          min_participants?: number
+          order_deadline?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          group_id?: string
+          id?: string
+          max_participants?: number | null
+          min_participants?: number
+          order_deadline?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_orders_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "community_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -273,6 +368,44 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_templates: {
+        Row: {
+          base_price: number
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          vendor_id: string
+        }
+        Insert: {
+          base_price: number
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          vendor_id: string
+        }
+        Update: {
+          base_price?: number
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_templates_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -569,6 +702,66 @@ export type Database = {
         }
         Relationships: []
       }
+      suspicious_activities: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          reference_id: string
+          reviewed: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          reference_id: string
+          reviewed?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          reference_id?: string
+          reviewed?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      transaction_logs: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          reference_id: string
+          transaction_type: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          reference_id: string
+          transaction_type: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          reference_id?: string
+          transaction_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           created_at: string | null
@@ -602,6 +795,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_recommendations: {
+        Row: {
+          created_at: string | null
+          id: string
+          meal_id: string
+          score: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meal_id: string
+          score?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meal_id?: string
+          score?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_recommendations_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           address: string | null
@@ -634,6 +862,45 @@ export type Database = {
           phone_number?: string | null
         }
         Relationships: []
+      }
+      vendor_earnings: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          order_id: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          order_id: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_earnings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_earnings_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendor_ratings: {
         Row: {

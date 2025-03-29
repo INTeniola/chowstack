@@ -4,6 +4,7 @@ import { MealPackage } from '@/components/MealPackageCard';
 import { MealPreservationGuide } from '@/types/preservationTypes';
 import { generatePreservationGuide as fetchPreservationGuide } from './edgeFunctions';
 import { saveMealPreservationGuide, getMealPreservationGuide } from './preservationDbService';
+import { trackEdgeFunctionPerformance, captureEdgeFunctionError } from '@/lib/sentry';
 
 export const generateMealPreservationGuide = async (meal: MealPackage): Promise<MealPreservationGuide> => {
   // First check if we already have a guide for this meal
@@ -14,7 +15,11 @@ export const generateMealPreservationGuide = async (meal: MealPackage): Promise<
   
   // Use the edge function to generate preservation guide
   try {
+    const startTime = performance.now();
     const response = await fetchPreservationGuide(meal.id);
+    const endTime = performance.now();
+    
+    trackEdgeFunctionPerformance('generate-preservation-guide', endTime - startTime, !!response.success);
     
     if (!response.success) {
       throw new Error(response.error || 'Failed to generate preservation guide');
@@ -43,6 +48,7 @@ export const generateMealPreservationGuide = async (meal: MealPackage): Promise<
     
     return mealGuide;
   } catch (error) {
+    captureEdgeFunctionError('generate-preservation-guide', error);
     console.error('Error generating preservation guide:', error);
     
     // Fallback to mock data in case of error
