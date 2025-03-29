@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// MealStock custom colors
+				mealstock: {
+					green: '#2E7D32',
+					orange: '#F57C00',
+					cream: '#FFF8E1',
+					brown: '#3E2723',
+					lightGreen: '#A5D6A7',
+					lightOrange: '#FFCC80',
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,19 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				wiggle: {
+					'0%, 100%': { transform: 'rotate(-3deg)' },
+					'50%': { transform: 'rotate(3deg)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'wiggle': 'wiggle 1s ease-in-out infinite',
+			},
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
 			}
 		}
 	},
