@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, ShoppingCart } from 'lucide-react';
+import { Menu, X, User, ShoppingCart, Users } from 'lucide-react';
 import Logo from './Logo';
 
 interface NavbarProps {
@@ -38,6 +38,18 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
               className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
             >
               Discover
+            </Link>
+            <Link 
+              to="/meal-planner" 
+              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
+            >
+              Meal Planner
+            </Link>
+            <Link 
+              to="/community" 
+              className="text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
+            >
+              Community
             </Link>
             <Link 
               to="/how-it-works" 
@@ -108,6 +120,20 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Discover
+              </Link>
+              <Link 
+                to="/meal-planner" 
+                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Meal Planner
+              </Link>
+              <Link 
+                to="/community" 
+                className="text-xl text-mealstock-brown hover:text-mealstock-green transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Community
               </Link>
               <Link 
                 to="/how-it-works" 
