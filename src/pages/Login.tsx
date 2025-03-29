@@ -6,11 +6,13 @@ import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Mail, Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSecurePassword } from '@/utils/passwordUtils';
 import { toast } from 'sonner';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -59,6 +62,11 @@ const Login = () => {
     toast.info("Generated password copied to form. Note that this is for registration, not login.", {
       description: "This feature is meant for creating new accounts."
     });
+    setPopoverOpen(false);
+  };
+
+  const handleFocus = () => {
+    setPopoverOpen(true);
   };
 
   return (
@@ -97,45 +105,62 @@ const Login = () => {
               </div>
               
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium">
-                    Password
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm"
-                      className="h-8 text-mealstock-green flex gap-1 items-center px-2"
-                      onClick={handleGeneratePassword}
-                    >
-                      <RefreshCw className="h-3 w-3" />
-                      <span className="text-xs">Suggest</span>
-                    </Button>
-                    <Link to="/forgot-password" className="text-sm text-mealstock-green hover:underline">
-                      Forgot?
-                    </Link>
-                  </div>
-                </div>
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+                  <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={handleChange}
+                        onFocus={handleFocus}
+                        className="pl-10"
+                        required
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-3">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Need a secure password?</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Generate a strong, unique password for your account.
+                        </p>
+                        <Button 
+                          onClick={handleGeneratePassword} 
+                          className="w-full text-sm h-8"
+                          size="sm"
+                        >
+                          Generate Secure Password
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{showPassword ? "Hide password" : "Show password"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <div className="text-right">
+                  <Link to="/forgot-password" className="text-sm text-mealstock-green hover:underline">
+                    Forgot password?
+                  </Link>
                 </div>
               </div>
               
