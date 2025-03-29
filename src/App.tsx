@@ -19,25 +19,27 @@ const App = () => {
   const { isOnline, lowBandwidthMode } = useConnectivity();
   
   return (
-    <TooltipProvider>
-      <Sonner />
-      <div className={lowBandwidthMode ? "low-bandwidth-mode" : ""}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/discovery" element={<Discovery />} />
-          <Route path="/meal-planner" element={<MealPlanner />} />
-          <Route path="/community" element={<CommunityHub />} />
-          <Route path="/vendor" element={<VendorPortal />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <OfflineIndicator />
-      </div>
-    </TooltipProvider>
+    <>
+      <TooltipProvider>
+        <Sonner />
+        <div className={lowBandwidthMode ? "low-bandwidth-mode" : ""}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/discovery" element={<Discovery />} />
+            <Route path="/meal-planner" element={<MealPlanner />} />
+            <Route path="/community" element={<CommunityHub />} />
+            <Route path="/vendor" element={<VendorPortal />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <OfflineIndicator />
+        </div>
+      </TooltipProvider>
+    </>
   );
 };
 
