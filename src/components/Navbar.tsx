@@ -1,14 +1,11 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LogIn, UserPlus } from 'lucide-react';
 import Logo from './Logo';
 import MobileMenu from './MobileMenu';
 import { Button } from "@/components/ui/button";
-
 const Navbar: React.FC = () => {
-  return (
-    <nav className="bg-background border-b border-border py-2.5 sticky top-0 z-50">
+  return <nav className="bg-background border-b border-border py-2.5 sticky top-0 z-50">
       <div className="container-custom flex flex-wrap items-center justify-between mx-auto px-4">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
@@ -42,7 +39,7 @@ const Navbar: React.FC = () => {
               <Link to="/" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0" aria-current="page">Home</Link>
             </li>
             <li>
-              <Link to="/discovery" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Discovery</Link>
+              <Link to="/discovery" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Discover</Link>
             </li>
             <li>
               <Link to="/meal-planner" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Meal Planner</Link>
@@ -53,8 +50,6 @@ const Navbar: React.FC = () => {
           </ul>
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 };
-
 export default Navbar;
