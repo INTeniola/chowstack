@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Fork, UtensilsCrossed } from 'lucide-react';
+import { Utensils, UtensilsCrossed } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -37,9 +37,9 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true }) => {
           <div className="w-1/2 h-1/2 border-4 border-mealstock-green rounded-full border-l-transparent border-b-transparent rotate-45"></div>
         </div>
         
-        {/* Fork icon for pasta feel */}
+        {/* Utensils icon for pasta feel */}
         <div className="absolute -bottom-1 -right-1 transform rotate-45">
-          <Fork 
+          <Utensils 
             size={iconSize[size]} 
             className="text-mealstock-green"
           />
