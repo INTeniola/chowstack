@@ -48,7 +48,7 @@ const Features: React.FC = () => {
       <div className="container-custom">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-mealstock-brown mb-4">
-            Why Choose MealStock?
+            Why Choose ChowStack?
           </h2>
           <p className="text-lg text-mealstock-brown/80 max-w-2xl mx-auto">
             We make meal planning and preparation effortless with our convenient bulk delivery service.

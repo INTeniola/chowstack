@@ -86,7 +86,7 @@ const Contact = () => {
                   <Mail className="text-mealstock-green mt-1" />
                   <div>
                     <h3 className="font-medium">Email Address</h3>
-                    <p className="text-muted-foreground">info@mealstock.ng</p>
+                    <p className="text-muted-foreground">info@chowstack.ng</p>
                   </div>
                 </CardContent>
               </Card>

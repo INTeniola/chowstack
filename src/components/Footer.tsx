@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
             <Logo withText={false} />
-            <h3 className="text-xl font-bold mt-2 text-white">MealStock</h3>
+            <h3 className="text-xl font-bold mt-2 text-white">ChowStack</h3>
             <p className="mt-2 text-white/80">
               Bulk meal delivery for busy Nigerians. Plan, order, and enjoy.
             </p>
@@ -84,14 +84,14 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-start space-x-2">
                 <Mail size={18} className="mt-1 flex-shrink-0 text-mealstock-orange" />
-                <span className="text-white/80">info@mealstock.ng</span>
+                <span className="text-white/80">info@chowstack.ng</span>
               </li>
             </ul>
           </div>
         </div>
         
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-white/60 text-sm">
-          <p>© {new Date().getFullYear()} MealStock. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} ChowStack. All rights reserved.</p>
         </div>
       </div>
     </footer>
