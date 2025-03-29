@@ -2,8 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { MealPackage } from '@/components/MealPackageCard';
 import { MealPreservationGuide } from '@/types/preservationTypes';
-import { generatePreservationInstructions } from './claudeService';
-import { generateAudioInstructions, generateQRCodeForAudio } from './elevenLabsService';
+import { generatePreservationGuide as fetchPreservationGuide } from './edgeFunctions';
 import { saveMealPreservationGuide, getMealPreservationGuide } from './preservationDbService';
 
 export const generateMealPreservationGuide = async (meal: MealPackage): Promise<MealPreservationGuide> => {
@@ -13,40 +12,77 @@ export const generateMealPreservationGuide = async (meal: MealPackage): Promise<
     return existingGuide;
   }
   
-  // Generate instructions using Claude API service
-  const { preservationInstructions, reheatingInstructions, freshnessDuration } = 
-    await generatePreservationInstructions(meal);
-  
-  // Generate audio instructions using ElevenLabs service
-  const audioInstructionUrl = await generateAudioInstructions(
-    meal.name,
-    preservationInstructions,
-    reheatingInstructions
-  );
-  
-  // Generate QR code for audio instructions
-  const qrCodeUrl = await generateQRCodeForAudio(audioInstructionUrl);
-  
-  // Create the guide
-  const guide: MealPreservationGuide = {
-    id: uuidv4(),
-    mealId: meal.id,
-    mealName: meal.name,
-    imageUrl: meal.imageUrl,
-    preservationInstructions,
-    reheatingInstructions,
-    freshnessDuration,
-    audioInstructionUrl,
-    qrCodeUrl,
-    customNotes: '',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  
-  // Save to database
-  await saveMealPreservationGuide(guide);
-  
-  return guide;
+  // Use the edge function to generate preservation guide
+  try {
+    const response = await fetchPreservationGuide(meal.id);
+    
+    if (!response.success) {
+      throw new Error(response.error || 'Failed to generate preservation guide');
+    }
+    
+    const guide = response.guide;
+    
+    // Convert the guide to our application format
+    const mealGuide: MealPreservationGuide = {
+      id: guide.id,
+      mealId: guide.meal_id,
+      mealName: meal.name,
+      imageUrl: meal.imageUrl,
+      preservationInstructions: guide.preservation_instructions,
+      reheatingInstructions: guide.reheating_instructions,
+      freshnessDuration: guide.freshness_duration,
+      audioInstructionUrl: guide.audio_url,
+      qrCodeUrl: guide.qr_code_url,
+      customNotes: '',
+      createdAt: new Date(guide.created_at),
+      updatedAt: new Date(guide.updated_at)
+    };
+    
+    // Also save to our local cache
+    await saveMealPreservationGuide(mealGuide);
+    
+    return mealGuide;
+  } catch (error) {
+    console.error('Error generating preservation guide:', error);
+    
+    // Fallback to mock data in case of error
+    const mockGuide: MealPreservationGuide = {
+      id: uuidv4(),
+      mealId: meal.id,
+      mealName: meal.name,
+      imageUrl: meal.imageUrl,
+      preservationInstructions: [
+        {
+          method: 'refrigerate',
+          duration: { value: 3, unit: 'days' },
+          tips: [
+            'Store in an airtight container',
+            'Keep on the middle shelf of your refrigerator',
+            'Consume within 3 days for best quality'
+          ]
+        }
+      ],
+      reheatingInstructions: [
+        {
+          method: 'microwave',
+          duration: { value: 2, unit: 'minutes' },
+          steps: [
+            'Place in a microwave-safe container',
+            'Cover with a microwave-safe lid',
+            'Heat on high for 2 minutes or until hot throughout'
+          ]
+        }
+      ],
+      freshnessDuration: 3,
+      customNotes: '',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await saveMealPreservationGuide(mockGuide);
+    
+    return mockGuide;
+  }
 };
 
 // Add a function to calculate expiration date

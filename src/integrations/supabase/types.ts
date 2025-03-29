@@ -86,6 +86,36 @@ export type Database = {
           },
         ]
       }
+      community_suggestions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_matched: boolean | null
+          potential_savings: number | null
+          similarity_score: number
+          suggested_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_matched?: boolean | null
+          potential_savings?: number | null
+          similarity_score: number
+          suggested_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_matched?: boolean | null
+          potential_savings?: number | null
+          similarity_score?: number
+          suggested_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       group_members: {
         Row: {
           group_id: string
@@ -118,6 +148,89 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory: {
+        Row: {
+          id: string
+          last_updated: string | null
+          low_threshold: number
+          meal_id: string
+          quantity: number
+          vendor_id: string
+        }
+        Insert: {
+          id?: string
+          last_updated?: string | null
+          low_threshold?: number
+          meal_id: string
+          quantity: number
+          vendor_id: string
+        }
+        Update: {
+          id?: string
+          last_updated?: string | null
+          low_threshold?: number
+          meal_id?: string
+          quantity?: number
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_preservation_guides: {
+        Row: {
+          audio_url: string | null
+          created_at: string | null
+          freshness_duration: number
+          id: string
+          meal_id: string
+          preservation_instructions: Json
+          reheating_instructions: Json
+          updated_at: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string | null
+          freshness_duration: number
+          id?: string
+          meal_id: string
+          preservation_instructions: Json
+          reheating_instructions: Json
+          updated_at?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string | null
+          freshness_duration?: number
+          id?: string
+          meal_id?: string
+          preservation_instructions?: Json
+          reheating_instructions?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_preservation_guides_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: true
+            referencedRelation: "meals"
             referencedColumns: ["id"]
           },
         ]
@@ -453,6 +566,39 @@ export type Database = {
           name?: string | null
           phone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          cuisine_preferences: string[] | null
+          dietary_restrictions: string[] | null
+          favorite_meal_ids: string[] | null
+          id: string
+          price_sensitivity: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          cuisine_preferences?: string[] | null
+          dietary_restrictions?: string[] | null
+          favorite_meal_ids?: string[] | null
+          id?: string
+          price_sensitivity?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          cuisine_preferences?: string[] | null
+          dietary_restrictions?: string[] | null
+          favorite_meal_ids?: string[] | null
+          id?: string
+          price_sensitivity?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

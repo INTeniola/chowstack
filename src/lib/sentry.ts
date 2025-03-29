@@ -59,3 +59,32 @@ export const trackUserAction = (action: string, data?: Record<string, any>) => {
     level: 'info',
   });
 };
+
+// Track edge function performance and errors
+export const trackEdgeFunctionPerformance = (functionName: string, durationMs: number, success: boolean) => {
+  Sentry.addBreadcrumb({
+    category: 'edge-function',
+    message: `Edge function: ${functionName}`,
+    data: {
+      durationMs,
+      success,
+    },
+    level: success ? 'info' : 'error',
+  });
+  
+  if (!success) {
+    Sentry.captureMessage(`Edge function error: ${functionName}`, {
+      level: 'error',
+    });
+  }
+};
+
+// Monitor edge function errors
+export const captureEdgeFunctionError = (functionName: string, error: any) => {
+  Sentry.captureException(error, {
+    tags: {
+      component: 'edge-function',
+      functionName,
+    },
+  });
+};
