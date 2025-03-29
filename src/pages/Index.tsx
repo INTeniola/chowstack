@@ -127,7 +127,7 @@ const Index = () => {
               ].map((plan, index) => (
                 <div 
                   key={index} 
-                  className={`rounded-xl overflow-hidden ${
+                  className={`rounded-xl overflow-hidden flex flex-col h-full ${
                     plan.featured 
                     ? 'border-2 border-mealstock-orange shadow-lg transform md:-translate-y-4' 
                     : 'border border-mealstock-green/10'
@@ -138,29 +138,31 @@ const Index = () => {
                       Most Popular
                     </div>
                   )}
-                  <div className="p-8 bg-white">
-                    <h3 className="text-xl font-semibold text-mealstock-brown mb-2">
-                      {plan.name}
-                    </h3>
-                    <p className="text-mealstock-brown/80 mb-4">
-                      {plan.description}
-                    </p>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-mealstock-brown">{plan.price}</span>
-                      <span className="text-mealstock-brown/80">/month</span>
+                  <div className="p-8 bg-white flex flex-col flex-1">
+                    <div>
+                      <h3 className="text-xl font-semibold text-mealstock-brown mb-2">
+                        {plan.name}
+                      </h3>
+                      <p className="text-mealstock-brown/80 mb-4">
+                        {plan.description}
+                      </p>
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold text-mealstock-brown">{plan.price}</span>
+                        <span className="text-mealstock-brown/80">/month</span>
+                      </div>
+                      <ul className="space-y-3 mb-8">
+                        {plan.features.map((feature, i) => (
+                          <li key={i} className="flex items-center text-mealstock-brown">
+                            <svg className="w-5 h-5 text-mealstock-green mr-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="space-y-3 mb-8">
-                      {plan.features.map((feature, i) => (
-                        <li key={i} className="flex items-center text-mealstock-brown">
-                          <svg className="w-5 h-5 text-mealstock-green mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
                     <button 
-                      className={`w-full py-3 rounded-md font-medium ${
+                      className={`w-full py-3 rounded-md font-medium mt-auto ${
                         plan.featured 
                         ? 'bg-mealstock-orange hover:bg-mealstock-orange/90 text-white' 
                         : 'bg-mealstock-green hover:bg-mealstock-green/90 text-white'
