@@ -203,29 +203,63 @@ export const uploadFile = async ({
     
     const filePath = getStoragePath(userId, fileToUpload.name, path);
     
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, fileToUpload, {
-        cacheControl: '3600',
-        upsert: true,
-        onUploadProgress: onProgress 
-          ? (event) => {
-              const progress = (event.loaded / event.total) * 100;
-              onProgress(progress);
-            }
-          : undefined
-      });
-    
-    if (error) {
-      throw error;
+    // Create upload options, and handle progress separately if provided
+    const uploadOptions: any = {
+      cacheControl: '3600',
+      upsert: true
+    };
+
+    // Setup a progress callback if requested
+    if (onProgress) {
+      // Using event listener pattern instead of onUploadProgress
+      const uploadTask = supabase.storage
+        .from(bucket)
+        .upload(filePath, fileToUpload, uploadOptions);
+        
+      // We can't directly track progress with the current Supabase JS client
+      // Mocking progress for now
+      let mockProgress = 0;
+      const progressInterval = setInterval(() => {
+        mockProgress += 10;
+        if (mockProgress <= 90) {
+          onProgress(mockProgress);
+        } else {
+          clearInterval(progressInterval);
+        }
+      }, 300);
+
+      const { data, error } = await uploadTask;
+      clearInterval(progressInterval);
+      
+      if (error) {
+        throw error;
+      }
+      
+      onProgress(100);
+      
+      // Return the public URL
+      const { data: urlData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(data.path);
+      
+      return urlData.publicUrl;
+    } else {
+      // Without progress tracking
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, fileToUpload, uploadOptions);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Return the public URL
+      const { data: urlData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(data.path);
+      
+      return urlData.publicUrl;
     }
-    
-    // Return the public URL
-    const { data: urlData } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path);
-    
-    return urlData.publicUrl;
   } catch (error: any) {
     console.error('Error uploading file:', error);
     toast.error('Error uploading file', {
@@ -266,7 +300,10 @@ export const deleteFile = async (
  */
 export const getPathFromUrl = (url: string, bucket: StorageBucket): string | null => {
   try {
-    const baseUrl = `${supabase.storageUrl}/object/public/${bucket}/`;
+    // Get the base URL for this bucket without directly accessing storageUrl
+    const { data } = supabase.storage.from(bucket).getPublicUrl('');
+    const baseUrl = data.publicUrl.split('/').slice(0, -1).join('/') + '/';
+    
     if (url.startsWith(baseUrl)) {
       return url.replace(baseUrl, '');
     }
