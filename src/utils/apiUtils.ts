@@ -1,4 +1,3 @@
-
 import { MealPackage } from '@/components/MealPackageCard';
 import { Vendor } from '@/components/VendorCard';
 
@@ -16,7 +15,7 @@ const mockMealPackages: MealPackage[] = [
     deliveryTime: 45,
     mealCount: 8,
     cuisineType: ['Nigerian', 'West African'],
-    vendorName: 'Mama's Kitchen',
+    vendorName: "Mama's Kitchen",
     vendorId: 'v1',
     dietaryTags: ['Halal']
   },
@@ -161,7 +160,7 @@ const mockWeeklySpecials: MealPackage[] = [
 const mockVendors: Vendor[] = [
   {
     id: 'v1',
-    name: 'Mama's Kitchen',
+    name: "Mama's Kitchen",
     imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2940&auto=format&fit=crop',
     coverImageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2874&auto=format&fit=crop',
     rating: 4.8,
