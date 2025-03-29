@@ -13,31 +13,32 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ResponsiveImage } from '@/components/uploads/ResponsiveImage';
 
 // Reliable Nigerian food images that are guaranteed to work
 const NIGERIAN_FOODS = [
   {
-    src: "https://images.unsplash.com/photo-1647102398925-e30527aee930",
+    src: "https://images.unsplash.com/photo-1574484284002-952d92456975",
     alt: "Nigerian Jollof Rice"
   },
   {
-    src: "https://images.unsplash.com/photo-1640527051371-1f7b5c32a062",
+    src: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
     alt: "Egusi Soup with Pounded Yam"
   },
   {
-    src: "https://images.unsplash.com/photo-1643553210055-8416a305c7e9",
+    src: "https://images.unsplash.com/photo-1585937421612-70a008356fbe",
     alt: "Suya (Nigerian Spiced Skewers)"
   },
   {
-    src: "https://images.unsplash.com/photo-1667489021871-7d8923f1033e",
+    src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
     alt: "Moin Moin (Steamed Bean Pudding)"
   },
   {
-    src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    src: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd",
     alt: "Nigerian Feast"
   },
   {
-    src: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83",
+    src: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd",
     alt: "African Cuisine"
   }
 ];
@@ -189,16 +190,11 @@ const Hero: React.FC = () => {
                     {foodImages.map((food, index) => (
                       <CarouselItem key={index}>
                         <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                          <img
+                          <ResponsiveImage
                             src={food.src}
                             alt={food.alt}
                             className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // If an image fails to load, replace it with one from our reliable set
-                              const fallbackImage = NIGERIAN_FOODS[index % NIGERIAN_FOODS.length];
-                              console.log(`Image ${food.src} failed to load, using fallback: ${fallbackImage.src}`);
-                              e.currentTarget.src = fallbackImage.src;
-                            }}
+                            fallbackSrc="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
                           />
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                             <p className="text-white font-medium text-sm md:text-base">
