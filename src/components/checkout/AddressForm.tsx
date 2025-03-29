@@ -56,11 +56,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressUpdate, defaultAddre
 
       toast.success("Address verified successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not verify address. Please check your input and try again.",
-        variant: "destructive",
-      });
+      toast.error("Could not verify address. Please check your input and try again.");
     } finally {
       setIsVerifying(false);
     }
@@ -106,31 +102,19 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressUpdate, defaultAddre
             
             toast.success("Location detected successfully");
           } catch (error) {
-            toast({
-              title: "Error",
-              description: "Could not determine your location. Please enter your address manually.",
-              variant: "destructive",
-            });
+            toast.error("Could not determine your location. Please enter your address manually.");
           } finally {
             setIsLoadingLocation(false);
           }
         },
         (error) => {
           console.error("Geolocation error:", error);
-          toast({
-            title: "Location Access Denied",
-            description: "Please enable location access or enter your address manually.",
-            variant: "destructive",
-          });
+          toast.error("Please enable location access or enter your address manually.");
           setIsLoadingLocation(false);
         }
       );
     } else {
-      toast({
-        title: "Geolocation Not Supported",
-        description: "Your browser doesn't support geolocation. Please enter your address manually.",
-        variant: "destructive",
-      });
+      toast.error("Your browser doesn't support geolocation. Please enter your address manually.");
     }
   };
 
