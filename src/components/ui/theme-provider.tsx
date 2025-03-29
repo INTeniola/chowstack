@@ -49,18 +49,18 @@ export function ThemeProvider({
     root.classList.add(theme)
   }, [theme])
   
-  // Ensure the value object strictly matches ThemeContextType
-  const value: ThemeContextType = {
+  // Create the value object with explicit typing
+  const value = {
     theme,
     setTheme: (newTheme: Theme) => {
       localStorage.setItem(storageKey, newTheme)
       setTheme(newTheme)
     },
-  }
+  } as ThemeContextType
 
   return (
-    <ThemeProviderContext.Provider value={value} {...props}>
-      {children}
+    <ThemeProviderContext.Provider value={value}>
+      <div {...props}>{children}</div>
     </ThemeProviderContext.Provider>
   )
 }
