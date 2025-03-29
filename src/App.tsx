@@ -13,13 +13,18 @@ import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import { OfflineIndicator } from "./components/ui/offline-indicator";
 import { useConnectivity } from "./contexts/ConnectivityContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
-// New pages
-import About from "./pages/About";
-import Contact from "./pages/Contact";
+// Auth pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AuthCallback from "./pages/AuthCallback";
+import ResetPassword from "./pages/ResetPassword";
+import Onboarding from "./pages/Onboarding";
+
+// Other pages
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import OurChefs from "./pages/OurChefs";
 import Careers from "./pages/Careers";
 import Press from "./pages/Press";
@@ -38,23 +43,8 @@ const App = () => {
         <Sonner />
         <div className={lowBandwidthMode ? "low-bandwidth-mode" : ""}>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
-            <Route path="/discovery" element={<Discovery />} />
-            <Route path="/meal-planner" element={<MealPlanner />} />
-            <Route path="/community" element={<CommunityHub />} />
-            <Route path="/vendor" element={<VendorPortal />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/settings" element={<Settings />} />
-            
-            {/* Auth routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            
-            {/* Other routes */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/our-chefs" element={<OurChefs />} />
@@ -64,8 +54,93 @@ const App = () => {
             <Route path="/blog" element={<Blog />} />
             <Route path="/faqs" element={<FAQs />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/discovery" element={<Discovery />} />
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route 
+              path="/onboarding" 
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Protected Routes - Require Authentication */}
+            <Route 
+              path="/meal-planner" 
+              element={
+                <ProtectedRoute>
+                  <MealPlanner />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/community" 
+              element={
+                <ProtectedRoute>
+                  <CommunityHub />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/checkout" 
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/order-confirmation" 
+              element={
+                <ProtectedRoute>
+                  <OrderConfirmation />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/notifications" 
+              element={
+                <ProtectedRoute>
+                  <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Vendor Routes - Require Vendor Role */}
+            <Route 
+              path="/vendor" 
+              element={
+                <ProtectedRoute requiredRole="vendor">
+                  <VendorPortal />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes - Require Admin Role */}
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch-all Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <OfflineIndicator />

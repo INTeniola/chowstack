@@ -1,69 +1,127 @@
-# Welcome to your Lovable project
 
-## Project info
+# MealStock Authentication Guide
 
-**URL**: https://lovable.dev/projects/00d9e1e5-8f0e-4f27-aa1d-d9c632449bec
+This guide explains how to set up and configure the authentication system for MealStock.
 
-## How can I edit this code?
+## Authentication Features
 
-There are several ways of editing your application.
+MealStock uses Supabase for authentication with the following features:
 
-**Use Lovable**
+- Email/password authentication
+- Social login (Google, Facebook)
+- Role-based access control (Customer, Vendor, Admin)
+- Profile management
+- Password reset functionality
+- Custom onboarding flows
+- Protected routes
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/00d9e1e5-8f0e-4f27-aa1d-d9c632449bec) and start prompting.
+## Setup Instructions
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. Supabase Configuration
 
-**Use your preferred IDE**
+1. Go to your Supabase project dashboard
+2. Navigate to Authentication → Settings → Email
+3. Configure your email provider for authentication emails
+4. Enable/disable email confirmation based on your needs
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 2. Social Auth Providers
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+To enable social login methods:
 
-Follow these steps:
+#### Google Auth:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Go to your Supabase dashboard → Authentication → Providers
+2. Enable Google
+3. Create OAuth credentials in Google Cloud Console
+4. Add your redirect URL from Supabase to Google Cloud Console
+5. Add Client ID and Secret to Supabase
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+#### Facebook Auth:
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Go to your Supabase dashboard → Authentication → Providers
+2. Enable Facebook
+3. Create an app in Facebook Developers portal
+4. Add your redirect URL from Supabase to Facebook Developers portal
+5. Add Client ID and Secret to Supabase
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### 3. Email Templates
+
+For setting up custom email templates:
+
+1. Go to Authentication → Email Templates
+2. Customize:
+   - Confirmation Email
+   - Invitation Email
+   - Magic Link Email
+   - Reset Password Email
+   - Change Email Address Email
+
+### 4. SMTP Configuration
+
+To send transactional emails (welcome emails, order confirmations, etc.):
+
+1. Set up an SMTP server or use a service like SendGrid, Mailgun, or Resend
+2. Add your SMTP credentials to Supabase Edge Functions secrets
+3. Deploy the send-welcome-email Edge Function
+
+## Using Authentication in the App
+
+### Protected Routes
+
+Routes that require authentication are wrapped with the `ProtectedRoute` component:
+
+```jsx
+<Route 
+  path="/meal-planner" 
+  element={
+    <ProtectedRoute>
+      <MealPlanner />
+    </ProtectedRoute>
+  } 
+/>
 ```
 
-**Edit a file directly in GitHub**
+For role-specific routes, add the `requiredRole` prop:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```jsx
+<Route 
+  path="/vendor" 
+  element={
+    <ProtectedRoute requiredRole="vendor">
+      <VendorPortal />
+    </ProtectedRoute>
+  } 
+/>
+```
 
-**Use GitHub Codespaces**
+### Using Auth in Components
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Access authentication data and functions using the `useAuth` hook:
 
-## What technologies are used for this project?
+```jsx
+import { useAuth } from '@/hooks/useAuth';
 
-This project is built with .
+function MyComponent() {
+  const { user, isAuthenticated, login, signOut, updateUserProfile } = useAuth();
+  
+  // Use auth functions and data
+  
+  return (
+    // Component JSX
+  );
+}
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Troubleshooting
 
-## How can I deploy this project?
+- If emails aren't being sent, check your SMTP configuration
+- For social login issues, verify your OAuth credentials and redirect URLs
+- For RLS policy issues, review the policies in your Supabase database
 
-Simply open [Lovable](https://lovable.dev/projects/00d9e1e5-8f0e-4f27-aa1d-d9c632449bec) and click on Share -> Publish.
+## Security Best Practices
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- Never share or commit API keys
+- Use Row Level Security (RLS) policies to protect data
+- Implement proper validation on forms
+- Use HTTPS for all communication
+- Follow the principle of least privilege

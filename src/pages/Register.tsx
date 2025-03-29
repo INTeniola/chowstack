@@ -5,11 +5,42 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Lock, Phone, Eye, EyeOff, RefreshCw, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, MapPin, RefreshCw, AlertCircle, Check } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { generateSecurePassword, checkPasswordStrength } from '@/utils/passwordUtils';
 import { toast } from 'sonner';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage,
+  FormDescription
+} from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SignUpData } from '@/contexts/AuthContext';
+
+const registerSchema = z.object({
+  name: z.string().min(2, "Full name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z.string().min(6, "Phone number must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  address: z.string().optional(),
+  accountType: z.enum(["customer", "vendor"]),
+  termsAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the Terms of Service" }),
+  }),
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,11 +49,18 @@ const Register = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: ''
+  // Create form
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      address: "",
+      accountType: "customer",
+      termsAccepted: false
+    }
   });
 
   // Redirect if already authenticated
@@ -32,26 +70,15 @@ const Register = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Update password strength when password changes
-    if (name === 'password') {
-      setPasswordStrength(checkPasswordStrength(value));
-    }
-    
-    // Clear error when user types
-    if (error) {
-      setError(null);
-    }
-  };
+  // Watch password to calculate strength
+  const password = form.watch("password");
+  
+  // Update password strength when password changes
+  useEffect(() => {
+    setPasswordStrength(checkPasswordStrength(password));
+  }, [password]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: RegisterFormValues) => {
     setError(null);
     
     if (passwordStrength <= 1) {
@@ -60,12 +87,25 @@ const Register = () => {
     }
     
     try {
-      const success = await signUp(formData.email, formData.password, formData.name, formData.phone);
+      // Map form values to SignUpData
+      const signUpData: SignUpData = {
+        email: values.email,
+        password: values.password,
+        name: values.name,
+        phone: values.phone,
+        address: values.address,
+        isVendor: values.accountType === "vendor",
+        termsAccepted: values.termsAccepted
+      };
+      
+      const success = await signUp(signUpData);
       
       if (success) {
         toast.success("Account created successfully", {
           description: "Welcome to MealStock!"
         });
+        // For standard email/password auth, direct to login page
+        // For social auth or passwordless, will be handled in callback
         navigate('/login');
       }
     } catch (error: any) {
@@ -76,10 +116,7 @@ const Register = () => {
   
   const handleGeneratePassword = () => {
     const newPassword = generateSecurePassword();
-    setFormData(prev => ({
-      ...prev,
-      password: newPassword
-    }));
+    form.setValue("password", newPassword);
     setPasswordStrength(checkPasswordStrength(newPassword));
     toast.success("Secure password generated! Make sure to save it somewhere safe.");
   };
@@ -94,8 +131,8 @@ const Register = () => {
   return (
     <>
       <Navbar />
-      <main className="container-custom py-12 flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <Card className="w-full max-w-md">
+      <main className="container-custom py-8 flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <Card className="w-full max-w-3xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold flex items-center justify-center">
               <User className="mr-2" size={24} />
@@ -113,123 +150,278 @@ const Register = () => {
               </div>
             )}
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
+            <Tabs defaultValue="account" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="account">Account Information</TabsTrigger>
+                <TabsTrigger value="accountType">Account Type</TabsTrigger>
+              </TabsList>
               
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="+123 456 7890"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium">
-                    Password
-                  </label>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm"
-                    className="h-8 text-mealstock-green flex gap-1 items-center px-2"
-                    onClick={handleGeneratePassword}
-                  >
-                    <RefreshCw className="h-3 w-3" />
-                    <span className="text-xs">Suggest</span>
-                  </Button>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                
-                {/* Password strength indicator */}
-                {formData.password && (
-                  <div className="mt-2">
-                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${getStrengthColor()}`} 
-                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                      ></div>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <TabsContent value="account" className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                <Input 
+                                  placeholder="John Doe" 
+                                  {...field} 
+                                  className="pl-10"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                <Input 
+                                  placeholder="name@example.com" 
+                                  type="email" 
+                                  {...field} 
+                                  className="pl-10"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                <Input 
+                                  placeholder="+123 456 7890" 
+                                  type="tel" 
+                                  {...field} 
+                                  className="pl-10"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex items-center justify-between">
+                              <FormLabel>Password</FormLabel>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-8 text-mealstock-green flex gap-1 items-center px-2"
+                                onClick={handleGeneratePassword}
+                              >
+                                <RefreshCw className="h-3 w-3" />
+                                <span className="text-xs">Generate</span>
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                <Input
+                                  placeholder="••••••••"
+                                  type={showPassword ? "text" : "password"}
+                                  {...field}
+                                  className="pl-10"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                >
+                                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                              </div>
+                            </FormControl>
+                            
+                            {/* Password strength indicator */}
+                            {field.value && (
+                              <div className="mt-2">
+                                <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full ${getStrengthColor()}`} 
+                                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                                  ></div>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {passwordStrength <= 1 && "Weak password"}
+                                  {passwordStrength > 1 && passwordStrength <= 3 && "Medium password"}
+                                  {passwordStrength > 3 && "Strong password"}
+                                </p>
+                              </div>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Delivery Address</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <MapPin className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                                <Textarea 
+                                  placeholder="Your delivery address" 
+                                  {...field} 
+                                  className="pl-10 min-h-[80px]"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              You can update your delivery address later in your profile
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {passwordStrength <= 1 && "Weak password"}
-                      {passwordStrength > 1 && passwordStrength <= 3 && "Medium password"}
-                      {passwordStrength > 3 && "Strong password"}
-                    </p>
-                  </div>
-                )}
-              </div>
-              
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Sign Up"}
-              </Button>
-            </form>
+                    
+                    <Button
+                      type="button"
+                      onClick={() => form.trigger(["name", "email", "phone", "password"]).then(isValid => {
+                        if (isValid) {
+                          const tabsList = document.querySelector('[role="tablist"]');
+                          const accountTypeTab = tabsList?.querySelector('[value="accountType"]');
+                          if (accountTypeTab instanceof HTMLElement) {
+                            accountTypeTab.click();
+                          }
+                        }
+                      })}
+                      className="w-full"
+                    >
+                      Continue
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="accountType" className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="accountType"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel>Account Type</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col space-y-3"
+                            >
+                              <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                  <RadioGroupItem value="customer" />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer flex-1">
+                                  <div className="font-medium">Customer</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    I want to order meals and food packages
+                                  </div>
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                  <RadioGroupItem value="vendor" />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer flex-1">
+                                  <div className="font-medium">Vendor</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    I want to sell meals and food packages
+                                  </div>
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="termsAccepted"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-normal cursor-pointer">
+                              I agree to the{" "}
+                              <Link to="/terms" className="text-mealstock-green underline">
+                                Terms of Service
+                              </Link>{" "}
+                              and{" "}
+                              <Link to="/privacy-policy" className="text-mealstock-green underline">
+                                Privacy Policy
+                              </Link>
+                            </FormLabel>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const tabsList = document.querySelector('[role="tablist"]');
+                          const accountTab = tabsList?.querySelector('[value="account"]');
+                          if (accountTab instanceof HTMLElement) {
+                            accountTab.click();
+                          }
+                        }}
+                      >
+                        Back
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="flex-1" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Creating Account..." : "Sign Up"}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </form>
+              </Form>
+            </Tabs>
+            
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-center text-sm">
@@ -237,13 +429,6 @@ const Register = () => {
               <Link to="/login" className="text-mealstock-green hover:underline font-medium">
                 Sign in
               </Link>
-            </div>
-            
-            <div className="text-xs text-center text-muted-foreground">
-              By signing up, you agree to our{" "}
-              <Link to="/terms" className="underline">Terms of Service</Link>{" "}
-              and{" "}
-              <Link to="/privacy-policy" className="underline">Privacy Policy</Link>
             </div>
           </CardFooter>
         </Card>

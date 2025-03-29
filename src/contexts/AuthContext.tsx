@@ -1,5 +1,6 @@
+
 import { useState, useEffect, createContext } from 'react';
-import { User, transformUser } from '@/utils/authUtils';
+import { User, transformUser, authUtils } from '@/utils/authUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
@@ -9,10 +10,23 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   session: Session | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   signOut: () => Promise<void>;
-  signUp: (email: string, password: string, name: string, phone: string) => Promise<boolean>;
+  signUp: (data: SignUpData) => Promise<boolean>;
   updateUserProfile: (updates: Partial<User>) => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  updatePassword: (password: string) => Promise<boolean>;
+  completeOnboarding: (data: any) => Promise<boolean>;
+}
+
+export interface SignUpData {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+  address?: string;
+  isVendor?: boolean;
+  termsAccepted: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,14 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (currentSession?.user) {
           // Convert Supabase user to our app User type
-          const appUser: User = {
-            id: currentSession.user.id,
-            email: currentSession.user.email || '',
-            name: currentSession.user.user_metadata?.full_name || '',
-            phone: currentSession.user.phone || currentSession.user.user_metadata?.phone_number || '',
-            role: currentSession.user.user_metadata?.is_vendor ? 'vendor' : 'customer'
-          };
-          
+          const appUser = transformUser(currentSession.user);
           setUser(appUser);
           setIsAuthenticated(true);
         } else {
@@ -57,14 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       if (currentSession) {
         // Convert Supabase user to our app User type
-        const appUser: User = {
-          id: currentSession.user.id,
-          email: currentSession.user.email || '',
-          name: currentSession.user.user_metadata?.full_name || '',
-          phone: currentSession.user.phone || currentSession.user.user_metadata?.phone_number || '',
-          role: currentSession.user.user_metadata?.is_vendor ? 'vendor' : 'customer'
-        };
-        
+        const appUser = transformUser(currentSession.user);
         setUser(appUser);
         setSession(currentSession);
         setIsAuthenticated(true);
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, rememberMe: boolean = true): Promise<boolean> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -110,17 +110,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, name: string, phone: string): Promise<boolean> => {
+  const signUp = async (data: SignUpData): Promise<boolean> => {
+    if (!data.termsAccepted) {
+      toast.error("Terms of Service", {
+        description: "You must accept the Terms of Service to create an account."
+      });
+      return false;
+    }
+
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
         options: {
           data: {
-            full_name: name,
-            phone_number: phone,
-            is_vendor: false
+            full_name: data.name,
+            phone_number: data.phone,
+            address: data.address || '',
+            is_vendor: !!data.isVendor,
+            is_admin: false,
+            onboarding_completed: false
           }
         }
       });
@@ -133,17 +144,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
       
-      if (data.user) {
+      if (authData.user) {
         // Create a new user record in the public.users table
         const { error: insertError } = await supabase
           .from('users')
           .insert([
             { 
-              id: data.user.id,
-              email: data.user.email || '',
-              full_name: name,
-              phone_number: phone,
-              is_vendor: false
+              id: authData.user.id,
+              email: authData.user.email || '',
+              full_name: data.name,
+              phone_number: data.phone,
+              address: data.address || '',
+              is_vendor: !!data.isVendor,
+              dietary_preferences: null
             }
           ]);
           
@@ -196,26 +209,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user) return false;
 
     try {
-      // Update the user's metadata in Supabase Auth
-      const { error: authUpdateError } = await supabase.auth.updateUser({
-        data: {
-          full_name: updates.name,
-          phone_number: updates.phone
-        }
-      });
-
-      if (authUpdateError) throw authUpdateError;
-
-      // Also update the users table record
-      const { error: dbUpdateError } = await supabase
-        .from('users')
-        .update({ 
-          full_name: updates.name,
-          phone_number: updates.phone
-        })
-        .eq('id', user.id);
-
-      if (dbUpdateError) throw dbUpdateError;
+      const result = await authUtils.updateUserProfile(user.id, updates);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       // Update the local user state
       setUser(prev => prev ? { ...prev, ...updates } : null);
@@ -233,6 +231,76 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const requestPasswordReset = async (email: string): Promise<boolean> => {
+    try {
+      const result = await authUtils.requestPasswordReset(email);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      toast.success("Password reset email sent", {
+        description: "Please check your email for instructions to reset your password."
+      });
+      return true;
+    } catch (error: any) {
+      toast.error("Password reset failed", {
+        description: error.message || "Failed to send password reset email. Please try again."
+      });
+      return false;
+    }
+  };
+
+  const updatePassword = async (password: string): Promise<boolean> => {
+    try {
+      const result = await authUtils.updatePassword(password);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      toast.success("Password updated", {
+        description: "Your password has been successfully updated."
+      });
+      return true;
+    } catch (error: any) {
+      toast.error("Password update failed", {
+        description: error.message || "Failed to update password. Please try again."
+      });
+      return false;
+    }
+  };
+
+  const completeOnboarding = async (data: any): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      // Create updates object based on user role
+      const updates: Partial<User> = {
+        onboardingCompleted: true
+      };
+      
+      if (user.role === 'customer') {
+        updates.dietaryPreferences = data.dietaryPreferences;
+        updates.address = data.address;
+      } else if (user.role === 'vendor') {
+        updates.businessInfo = {
+          businessName: data.businessName,
+          businessAddress: data.businessAddress,
+          description: data.description
+        };
+      }
+      
+      const success = await updateUserProfile(updates);
+      return success;
+    } catch (error: any) {
+      toast.error("Failed to complete onboarding", {
+        description: error.message || "Please try again."
+      });
+      return false;
+    }
+  };
+
   const authContextValue: AuthContextType = {
     user,
     isAuthenticated,
@@ -242,6 +310,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     signUp,
     updateUserProfile,
+    requestPasswordReset,
+    updatePassword,
+    completeOnboarding
   };
 
   return (
