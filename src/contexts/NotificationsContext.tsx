@@ -6,7 +6,7 @@ import {
   getUserNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotification,
+  deleteNotification as deleteNotificationService,
   getUserNotificationPreferences,
   updateUserNotificationPreferences,
   defaultNotificationPreferences,
@@ -70,7 +70,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             message: item.content,
             timestamp: new Date(item.created_at),
             read: item.read,
-            actionUrl: item.action_url,
+            actionUrl: item.action_url || undefined, // Handle nullable field
             orderId: item.related_id,
             recipientId: item.user_id
           })));
@@ -92,7 +92,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           message: payload.new.content,
           timestamp: new Date(payload.new.created_at),
           read: payload.new.read,
-          actionUrl: payload.new.action_url,
+          actionUrl: payload.new.action_url || undefined, // Handle nullable field
           orderId: payload.new.related_id,
           recipientId: payload.new.user_id
         };
@@ -101,8 +101,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         
         // Show toast for new notification
         toast({
-          title: newNotification.title,
-          description: newNotification.message,
+          description: (
+            <div>
+              <div className="font-medium">{newNotification.title}</div>
+              <div className="text-sm">{newNotification.message}</div>
+            </div>
+          )
         });
       }
     });
@@ -192,7 +196,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     recipientId: string, 
     originalNotificationId: string,
     isDriverMessage: boolean
-  ) => {
+  ): Promise<void> => {
     if (!user) throw new Error('User not authenticated');
     
     await sendReplyMessage(
@@ -204,17 +208,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       isDriverMessage
     );
     
-    // Use the local service to update UI immediately
-    const response = await sendReplyMessage(
-      recipientId,
-      message,
-      user.id,
-      user.name || "Customer",
-      originalNotificationId,
-      isDriverMessage
-    );
-    
-    return response;
+    // We just need to fulfill the Promise<void> return type,
+    // so we don't need to return the response
   };
   
   return (

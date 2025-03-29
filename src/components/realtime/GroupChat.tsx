@@ -75,6 +75,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
       setLoading(true);
       
       try {
+        // First, get messages
         const { data, error } = await supabase
           .from('messages')
           .select(`
@@ -83,8 +84,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
             group_id, 
             message, 
             created_at, 
-            read,
-            profiles(name, avatar_url)
+            read
           `)
           .eq('group_id', groupId)
           .order('created_at', { ascending: true });
@@ -92,21 +92,28 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
         if (error) throw error;
         
         if (data) {
-          const formattedMessages = data.map(msg => ({
-            id: msg.id,
-            sender_id: msg.sender_id,
-            group_id: msg.group_id,
-            message: msg.message,
-            created_at: msg.created_at,
-            read: msg.read,
-            senderName: msg.profiles?.name || 'Unknown User',
-            senderAvatar: msg.profiles?.avatar_url
-          }));
+          // Then, fetch sender info separately for each message
+          const messagesWithSenders = await Promise.all(
+            data.map(async (msg) => {
+              // Get sender info
+              const { data: senderData, error: senderError } = await supabase
+                .from('users')  // Changed from 'profiles' to 'users'
+                .select('full_name, avatar_url') // Changed 'name' to 'full_name'
+                .eq('id', msg.sender_id)
+                .single();
+              
+              return {
+                ...msg,
+                senderName: senderError ? 'Unknown User' : senderData?.full_name, // Changed to full_name
+                senderAvatar: senderError ? undefined : senderData?.avatar_url
+              };
+            })
+          );
           
-          setMessages(formattedMessages);
+          setMessages(messagesWithSenders);
           
           // Mark messages as read
-          if (formattedMessages.some(msg => !msg.read && msg.sender_id !== user.id)) {
+          if (messagesWithSenders.some(msg => !msg.read && msg.sender_id !== user.id)) {
             await supabase
               .from('messages')
               .update({ read: true })
@@ -130,15 +137,15 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
         // Fetch the sender info
         const fetchSenderInfo = async () => {
           const { data, error } = await supabase
-            .from('profiles')
-            .select('name, avatar_url')
+            .from('users')  // Changed from 'profiles' to 'users'
+            .select('full_name, avatar_url') // Changed 'name' to 'full_name'
             .eq('id', payload.new.sender_id)
             .single();
             
           if (!error && data) {
             const message = {
               ...payload.new,
-              senderName: data.name,
+              senderName: data.full_name, // Changed to full_name
               senderAvatar: data.avatar_url
             };
             
@@ -207,7 +214,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
           created_at: new Date().toISOString(),
           read: false,
           senderName: user.name || 'You',
-          senderAvatar: user.avatar
+          senderAvatar: user.avatarUrl // Changed from avatar to avatarUrl
         }
       ]);
       
@@ -237,7 +244,11 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
     const isCurrentUser = isUserMessage(message);
     const timestamp = 'created_at' in message ? message.created_at : message.timestamp;
     const formattedTime = format(new Date(timestamp), 'h:mm a');
-    const senderName = 'senderName' in message ? message.senderName : message.userName;
+    
+    // Properly handle the sender name regardless of message type
+    const senderName = 'senderName' in message 
+      ? message.senderName 
+      : ('userName' in message ? message.userName : 'Unknown');
     
     return (
       <div
@@ -271,7 +282,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
                 : 'bg-muted'
             } rounded-lg px-3 py-2 text-sm`}
           >
-            {message.message || ('message' in message ? message.message : '')}
+            {message.message}
           </div>
         </div>
       </div>

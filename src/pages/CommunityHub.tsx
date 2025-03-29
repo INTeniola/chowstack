@@ -73,7 +73,7 @@ const CommunityHub: React.FC = () => {
     fetchUserGroups();
     
     // Subscribe to group member changes
-    const unsubscribe = subscribe<{ group_id: string }>('group_members', 'INSERT', (payload) => {
+    const unsubscribe = subscribe<{ group_id: string; user_id: string }>('group_members', 'INSERT', (payload) => {
       if (payload.new && payload.new.user_id === user?.id) {
         // Fetch the group details
         const fetchGroupDetails = async () => {
@@ -108,7 +108,7 @@ const CommunityHub: React.FC = () => {
     
     try {
       // Insert group
-      const { data: groupData, error: groupError } = await supabase
+      const { data: newGroupData, error: groupError } = await supabase
         .from('community_groups')
         .insert({
           name: groupData.name,
@@ -122,8 +122,8 @@ const CommunityHub: React.FC = () => {
         
       if (groupError) throw groupError;
       
-      if (groupData && groupData[0]) {
-        const newGroupId = groupData[0].id;
+      if (newGroupData && newGroupData[0]) {
+        const newGroupId = newGroupData[0].id;
         
         // Add creator as a member
         const { error: memberError } = await supabase
@@ -136,7 +136,7 @@ const CommunityHub: React.FC = () => {
         if (memberError) throw memberError;
         
         toast.success('Group Created', {
-          description: `Your group "${groupData[0].name}" has been created successfully!`,
+          description: `Your group "${newGroupData[0].name}" has been created successfully!`,
         });
         
         setIsCreateGroupOpen(false);

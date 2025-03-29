@@ -122,17 +122,18 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return () => {}; // Return no-op function if user is not logged in or offline
     }
 
-    const channel = supabase.channel(`table-changes:${table}`)
-      .on(
-        'postgres_changes',
-        {
-          event,
-          schema: 'public',
-          table
-        },
-        (payload) => callback(payload as any)
-      )
-      .subscribe();
+    const channel = supabase.channel(`table-changes:${table}`);
+    
+    // Fixed the event type issue by updating the subscription method
+    channel.on(
+      'postgres_changes',
+      { 
+        event: event,
+        schema: 'public',
+        table: table
+      },
+      (payload) => callback(payload as any)
+    ).subscribe();
 
     setChannels(prev => [...prev, channel]);
 
