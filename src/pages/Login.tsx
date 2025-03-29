@@ -6,9 +6,11 @@ import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { generateSecurePassword } from '@/utils/passwordUtils';
+import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -45,6 +47,17 @@ const Login = () => {
       options: {
         redirectTo: `${window.location.origin}/auth/callback`
       }
+    });
+  };
+  
+  const handleGeneratePassword = () => {
+    const newPassword = generateSecurePassword();
+    setFormData(prev => ({
+      ...prev,
+      password: newPassword
+    }));
+    toast.info("Generated password copied to form. Note that this is for registration, not login.", {
+      description: "This feature is meant for creating new accounts."
     });
   };
 
@@ -88,9 +101,21 @@ const Login = () => {
                   <label htmlFor="password" className="text-sm font-medium">
                     Password
                   </label>
-                  <Link to="/forgot-password" className="text-sm text-mealstock-green hover:underline">
-                    Forgot password?
-                  </Link>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-8 text-mealstock-green flex gap-1 items-center px-2"
+                      onClick={handleGeneratePassword}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      <span className="text-xs">Suggest</span>
+                    </Button>
+                    <Link to="/forgot-password" className="text-sm text-mealstock-green hover:underline">
+                      Forgot?
+                    </Link>
+                  </div>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />

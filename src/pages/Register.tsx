@@ -1,29 +1,31 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus, User, Mail, Lock, Eye, EyeOff, Phone } from 'lucide-react';
+import { LogIn, Mail, Lock, User, Phone, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { generateSecurePassword, checkPasswordStrength } from '@/utils/passwordUtils';
+import { toast } from 'sonner';
 
 const Register = () => {
   const navigate = useNavigate();
   const { signUp, isAuthenticated, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
-    password: '',
-    confirmPassword: ''
+    password: ''
   });
 
   // Redirect if already authenticated
-  useEffect(() => {
+  React.useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
     }
@@ -35,63 +37,63 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
-    // Clear previous error when user types
-    setFormError(null);
+    
+    // Update password strength when password changes
+    if (name === 'password') {
+      setPasswordStrength(checkPasswordStrength(value));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      setFormError("Passwords don't match. Please ensure both passwords match.");
-      return;
-    }
-    
-    const success = await signUp(
-      formData.email, 
-      formData.password,
-      formData.fullName,
-      formData.phone
-    );
-    
-    if (success) {
-      // If sign up was successful, redirect to login page
-      navigate('/login');
-    }
+    await signUp(formData.email, formData.password, formData.name, formData.phone);
+  };
+  
+  const handleGeneratePassword = () => {
+    const newPassword = generateSecurePassword();
+    setFormData(prev => ({
+      ...prev,
+      password: newPassword
+    }));
+    setPasswordStrength(checkPasswordStrength(newPassword));
+    toast.success("Secure password generated! Make sure to save it somewhere safe.");
+  };
+  
+  // Get color based on password strength
+  const getStrengthColor = () => {
+    if (passwordStrength <= 1) return "bg-red-500";
+    if (passwordStrength <= 3) return "bg-yellow-500";
+    return "bg-green-500";
   };
 
   return (
     <>
       <Navbar />
-      <main className="container-custom py-12 flex justify-center items-center">
+      <main className="container-custom py-12 flex justify-center items-center min-h-[calc(100vh-200px)]">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold flex items-center justify-center">
-              <UserPlus className="mr-2" size={24} />
-              Create an account
+              <User className="mr-2" size={24} />
+              Create your account
             </CardTitle>
             <CardDescription className="text-center">
-              Enter your details to create your MealStock account
+              Enter your details to sign up for a MealStock account
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {formError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                {formError}
-              </div>
-            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="fullName" className="text-sm font-medium">
+                <label htmlFor="name" className="text-sm font-medium">
                   Full Name
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
-                    id="fullName"
-                    name="fullName"
+                    id="name"
+                    name="name"
+                    type="text"
                     placeholder="John Doe"
-                    value={formData.fullName}
+                    value={formData.name}
                     onChange={handleChange}
                     className="pl-10"
                     required
@@ -127,7 +129,8 @@ const Register = () => {
                   <Input
                     id="phone"
                     name="phone"
-                    placeholder="+234..."
+                    type="tel"
+                    placeholder="+123 456 7890"
                     value={formData.phone}
                     onChange={handleChange}
                     className="pl-10"
@@ -137,9 +140,21 @@ const Register = () => {
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </label>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    className="h-8 text-mealstock-green flex gap-1 items-center px-2"
+                    onClick={handleGeneratePassword}
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    <span className="text-xs">Suggest</span>
+                  </Button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
@@ -160,29 +175,27 @@ const Register = () => {
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="text-sm font-medium">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
+                
+                {/* Password strength indicator */}
+                {formData.password && (
+                  <div className="mt-2">
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${getStrengthColor()}`} 
+                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {passwordStrength <= 1 && "Weak password"}
+                      {passwordStrength > 1 && passwordStrength <= 3 && "Medium password"}
+                      {passwordStrength > 3 && "Strong password"}
+                    </p>
+                  </div>
+                )}
               </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Create Account"}
+                {isLoading ? "Creating Account..." : "Sign Up"}
               </Button>
             </form>
           </CardContent>
@@ -194,32 +207,11 @@ const Register = () => {
               </Link>
             </div>
             
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t"></span>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/login')}
-                type="button"
-              >
-                Google
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/login')}
-                type="button"
-              >
-                Facebook
-              </Button>
+            <div className="text-xs text-center text-muted-foreground">
+              By signing up, you agree to our{" "}
+              <Link to="/terms" className="underline">Terms of Service</Link>{" "}
+              and{" "}
+              <Link to="/privacy-policy" className="underline">Privacy Policy</Link>
             </div>
           </CardFooter>
         </Card>
