@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -29,17 +28,14 @@ const Discovery = () => {
   const { isOnline, connectionQuality, lowBandwidthMode } = useConnectivity();
   const { shouldOptimizeImages } = useImageOptimization();
   
-  // Reduce query stale time for slow connections to show cached data faster
   const staleTime = connectionQuality === 'slow' || connectionQuality === 'poor' 
     ? 1000 * 60 * 30 // 30 minutes 
     : 1000 * 60 * 5; // 5 minutes
   
-  // Adjust network timeout based on connection quality
   const networkTimeout = connectionQuality === 'slow' || connectionQuality === 'poor'
     ? 60000 // 60 seconds for slow connections
     : 30000; // 30 seconds for normal connections
   
-  // Fetch meal packages data
   const { 
     data: mealPackages = [], 
     isLoading: loadingMeals,
@@ -49,12 +45,11 @@ const Discovery = () => {
     queryKey: ['mealPackages', filters],
     queryFn: () => fetchMealPackages(filters),
     staleTime,
-    retry: isOnline ? 2 : 0, // Don't retry if offline
+    retry: isOnline ? 2 : 0,
     networkMode: isOnline ? 'online' : 'always',
     refetchOnWindowFocus: connectionQuality !== 'slow' && connectionQuality !== 'poor',
   });
   
-  // Fetch vendors data
   const { 
     data: vendors = [], 
     isLoading: loadingVendors,
@@ -69,7 +64,6 @@ const Discovery = () => {
     refetchOnWindowFocus: connectionQuality !== 'slow' && connectionQuality !== 'poor',
   });
   
-  // Fetch weekly specials - only if online and not in lowest bandwidth mode
   const { 
     data: weeklySpecials = [], 
     isLoading: loadingSpecials,
@@ -85,14 +79,12 @@ const Discovery = () => {
     refetchOnWindowFocus: connectionQuality !== 'slow' && connectionQuality !== 'poor',
   });
   
-  // Filter for recommended packages (in a real app, this would be based on user preferences)
   const recommendedPackages = mealPackages.filter(pkg => pkg.rating >= 4.5).slice(0, 4);
   
   const handleFilterChange = (newFilters) => {
     setFilters({...filters, ...newFilters});
   };
 
-  // Function to handle all refetches
   const handleRefreshAll = () => {
     refetchMeals();
     refetchVendors();
@@ -101,10 +93,8 @@ const Discovery = () => {
     }
   };
   
-  // Should we use optimized components?
   const useOptimizedComponents = shouldOptimizeImages || lowBandwidthMode;
   
-  // MealPackage component to use based on optimization setting
   const MealComponent = useOptimizedComponents ? MealPackageCardOptimized : MealPackageCard;
   
   return (
@@ -112,7 +102,6 @@ const Discovery = () => {
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero section with search */}
         <section className="bg-gradient-to-b from-mealstock-lightGreen/20 to-mealstock-cream py-8">
           <div className="container-custom">
             <h1 className="text-3xl md:text-4xl font-bold text-mealstock-brown mb-4">
@@ -122,7 +111,6 @@ const Discovery = () => {
               Stock up your freezer with delicious, ready-to-heat Nigerian and international cuisine.
             </p>
             
-            {/* Offline warning if needed */}
             {!isOnline && (
               <Alert variant="destructive" className="mb-6">
                 <WifiOff className="h-4 w-4" />
@@ -133,7 +121,6 @@ const Discovery = () => {
               </Alert>
             )}
             
-            {/* Slow connection warning */}
             {isOnline && (connectionQuality === 'slow' || connectionQuality === 'poor') && !lowBandwidthMode && (
               <Alert variant="warning" className="mb-6 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
@@ -144,7 +131,6 @@ const Discovery = () => {
               </Alert>
             )}
             
-            {/* Search and filters */}
             <SearchFilters 
               searchTerm={searchTerm} 
               onSearchChange={setSearchTerm} 
@@ -152,7 +138,6 @@ const Discovery = () => {
               onFilterChange={handleFilterChange} 
             />
             
-            {/* Refresh button for offline/slow connection */}
             {((!isOnline || connectionQuality === 'slow' || connectionQuality === 'poor') && 
               (mealError || vendorError || specialsError)) && (
               <div className="flex justify-center mt-4">
@@ -169,7 +154,6 @@ const Discovery = () => {
           </div>
         </section>
         
-        {/* Weekly Specials - Only show if not in low bandwidth mode */}
         {(!lowBandwidthMode) && (
           <section className="py-8">
             <div className="container-custom">
@@ -198,7 +182,6 @@ const Discovery = () => {
           </section>
         )}
         
-        {/* Recommended for You */}
         <section className="py-8 bg-white">
           <div className="container-custom">
             <h2 className="text-2xl font-bold text-mealstock-brown mb-6">
@@ -221,7 +204,6 @@ const Discovery = () => {
           </div>
         </section>
         
-        {/* Main Discovery Tabs */}
         <section className="py-8">
           <div className="container-custom">
             <Tabs defaultValue="packages" className="w-full">
@@ -230,7 +212,6 @@ const Discovery = () => {
                 <TabsTrigger value="vendors">Featured Vendors</TabsTrigger>
               </TabsList>
               
-              {/* Meal Packages Tab */}
               <TabsContent value="packages">
                 {loadingMeals ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -247,7 +228,6 @@ const Discovery = () => {
                 )}
               </TabsContent>
               
-              {/* Vendors Tab */}
               <TabsContent value="vendors">
                 {loadingVendors ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
