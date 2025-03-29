@@ -5,11 +5,10 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Lock, Phone, Eye, EyeOff, MapPin, AlertCircle, Check } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { generateSecurePassword, checkPasswordStrength } from '@/utils/passwordUtils';
 import { toast } from 'sonner';
@@ -23,7 +22,6 @@ import {
   FormItem, 
   FormLabel, 
   FormMessage,
-  FormDescription
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SignUpData } from '@/contexts/AuthContext';
@@ -33,7 +31,6 @@ const registerSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().min(6, "Phone number must be at least 6 characters"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  address: z.string().optional(),
   accountType: z.enum(["customer", "vendor"]),
   termsAccepted: z.boolean().refine(val => val === true, {
     message: "You must accept the Terms of Service"
@@ -56,7 +53,6 @@ const Register = () => {
       email: "",
       phone: "",
       password: "",
-      address: "",
       accountType: "customer",
       termsAccepted: false
     }
@@ -88,7 +84,7 @@ const Register = () => {
         password: values.password,
         name: values.name,
         phone: values.phone,
-        address: values.address,
+        address: "", // We're no longer collecting address at registration
         isVendor: values.accountType === "vendor",
         termsAccepted: values.termsAccepted
       };
@@ -151,12 +147,13 @@ const Register = () => {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <TabsContent value="account" className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    {/* Rearranged form fields for better mobile experience */}
+                    <div className="space-y-4">
                       <FormField
                         control={form.control}
                         name="name"
                         render={({ field }) => (
-                          <FormItem className="col-span-1">
+                          <FormItem>
                             <FormLabel>Full Name</FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -177,7 +174,7 @@ const Register = () => {
                         control={form.control}
                         name="email"
                         render={({ field }) => (
-                          <FormItem className="col-span-1">
+                          <FormItem>
                             <FormLabel>Email Address</FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -199,7 +196,7 @@ const Register = () => {
                         control={form.control}
                         name="phone"
                         render={({ field }) => (
-                          <FormItem className="col-span-1">
+                          <FormItem>
                             <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -221,7 +218,7 @@ const Register = () => {
                         control={form.control}
                         name="password"
                         render={({ field }) => (
-                          <FormItem className="col-span-1">
+                          <FormItem>
                             <FormLabel className="flex justify-between items-center">
                               <span>Password</span>
                               <Button 
@@ -268,30 +265,6 @@ const Register = () => {
                                 </p>
                               </div>
                             )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Delivery Address</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <MapPin className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
-                                <Textarea 
-                                  placeholder="Your delivery address" 
-                                  {...field} 
-                                  className="pl-10 min-h-[80px]"
-                                />
-                              </div>
-                            </FormControl>
-                            <FormDescription>
-                              You can update your delivery address later in your profile
-                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}

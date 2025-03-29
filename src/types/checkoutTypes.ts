@@ -1,11 +1,11 @@
-
 export type DeliveryAddress = {
-  street: string;
-  city: string;
-  state: string;
-  postalCode?: string;
-  landmark?: string;
-  isVerified: boolean;
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  isVerified?: boolean;
+  coordinates?: Coordinates;
 };
 
 export type PaymentMethod = 
@@ -93,3 +93,8 @@ export type CommunityOrder = {
   status: 'gathering' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: Date;
 };
+
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}

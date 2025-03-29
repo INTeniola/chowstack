@@ -1,217 +1,263 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { toast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { MapPin, Loader2, CheckCircle } from 'lucide-react';
 import { DeliveryAddress } from '@/types/checkoutTypes';
-import { Check } from 'lucide-react';
 
 interface AddressFormProps {
   onAddressUpdate: (address: DeliveryAddress) => void;
-  initialAddress?: DeliveryAddress;
+  defaultAddress?: DeliveryAddress;
 }
 
-// Nigerian states
-const nigerianStates = [
-  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
-  "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT", "Gombe", "Imo", 
-  "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", 
-  "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", 
-  "Yobe", "Zamfara"
-];
-
-const AddressForm: React.FC<AddressFormProps> = ({ onAddressUpdate, initialAddress }) => {
-  const [address, setAddress] = useState<DeliveryAddress>(
-    initialAddress || {
-      street: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      landmark: '',
-      isVerified: false,
-    }
-  );
-  
+const AddressForm: React.FC<AddressFormProps> = ({ onAddressUpdate, defaultAddress }) => {
+  const [address, setAddress] = useState<DeliveryAddress>(defaultAddress || {
+    street: '',
+    city: '',
+    state: 'Lagos',
+    zipCode: '',
+    country: 'Nigeria',
+    isVerified: false,
+  });
   const [isVerifying, setIsVerifying] = useState(false);
-  
-  const handleChange = (field: keyof DeliveryAddress, value: string) => {
-    setAddress((prev) => ({
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [savedAsDefault, setSavedAsDefault] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setAddress(prev => ({
       ...prev,
-      [field]: value,
-      isVerified: false, // Reset verification when address changes
+      [name]: value,
+      isVerified: false,
     }));
   };
-  
-  const verifyAddress = async () => {
-    // Check if required fields are filled
-    if (!address.street || !address.city || !address.state) {
-      toast({
-        title: "Incomplete Address",
-        description: "Please fill all required fields to verify your address.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+
+  const handleVerifyAddress = async () => {
+    // Simulate address verification
     setIsVerifying(true);
-    
+
     try {
-      // In a real app, this would be an API call to a service like Google Maps or a local address verification service
-      // For this example, we'll simulate a network request
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulate a 90% chance of successful verification
-      const isSuccessful = Math.random() < 0.9;
-      
-      if (isSuccessful) {
-        const verifiedAddress: DeliveryAddress = {
-          ...address,
-          isVerified: true,
-        };
-        
-        setAddress(verifiedAddress);
-        onAddressUpdate(verifiedAddress);
-        
-        toast({
-          title: "Address Verified",
-          description: "Your delivery address has been verified successfully.",
-        });
-      } else {
-        toast({
-          title: "Verification Failed",
-          description: "We couldn't verify your address. Please check and try again.",
-          variant: "destructive",
-        });
-      }
+      // In a real app, this would be an API call to verify the address
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Simulate successful verification
+      setAddress(prev => ({
+        ...prev,
+        isVerified: true,
+      }));
+
+      onAddressUpdate({
+        ...address,
+        isVerified: true,
+      });
+
+      toast.success("Address verified successfully");
     } catch (error) {
-      console.error('Error verifying address:', error);
       toast({
-        title: "Verification Error",
-        description: "There was an error verifying your address. Please try again.",
+        title: "Error",
+        description: "Could not verify address. Please check your input and try again.",
         variant: "destructive",
       });
     } finally {
       setIsVerifying(false);
     }
   };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!address.isVerified) {
-      verifyAddress();
-    } else {
-      onAddressUpdate(address);
+
+  const handleSaveAsDefault = (checked: boolean) => {
+    setSavedAsDefault(checked);
+    // In a real app, this would save the address to the user's profile
+    if (checked) {
+      toast.success("Address saved as default");
     }
   };
-  
+
+  const handleUseCurrentLocation = () => {
+    if (navigator.geolocation) {
+      setIsLoadingLocation(true);
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            
+            // In a real app, this would be a reverse geocoding API call
+            // For demo purposes, we'll simulate it with a timeout
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Simulate getting an address from coordinates
+            const mockAddress: DeliveryAddress = {
+              street: "123 Detected Street",
+              city: "Lagos",
+              state: "Lagos",
+              zipCode: "100001",
+              country: "Nigeria",
+              isVerified: true,
+              coordinates: {
+                latitude,
+                longitude
+              }
+            };
+            
+            setAddress(mockAddress);
+            onAddressUpdate(mockAddress);
+            
+            toast.success("Location detected successfully");
+          } catch (error) {
+            toast({
+              title: "Error",
+              description: "Could not determine your location. Please enter your address manually.",
+              variant: "destructive",
+            });
+          } finally {
+            setIsLoadingLocation(false);
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          toast({
+            title: "Location Access Denied",
+            description: "Please enable location access or enter your address manually.",
+            variant: "destructive",
+          });
+          setIsLoadingLocation(false);
+        }
+      );
+    } else {
+      toast({
+        title: "Geolocation Not Supported",
+        description: "Your browser doesn't support geolocation. Please enter your address manually.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="street" className="font-medium">
-          Street Address <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="street"
-          placeholder="Enter your street address"
-          value={address.street}
-          onChange={(e) => handleChange('street', e.target.value)}
-          required
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city" className="font-medium">
-            City <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="city"
-            placeholder="Enter your city"
-            value={address.city}
-            onChange={(e) => handleChange('city', e.target.value)}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="state" className="font-medium">
-            State <span className="text-red-500">*</span>
-          </Label>
-          <Select 
-            value={address.state} 
-            onValueChange={(value) => handleChange('state', value)}
-          >
-            <SelectTrigger id="state">
-              <SelectValue placeholder="Select a state" />
-            </SelectTrigger>
-            <SelectContent>
-              {nigerianStates.map((state) => (
-                <SelectItem key={state} value={state}>{state}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="postalCode" className="font-medium">
-            Postal Code
-          </Label>
-          <Input
-            id="postalCode"
-            placeholder="Enter postal code (if available)"
-            value={address.postalCode || ''}
-            onChange={(e) => handleChange('postalCode', e.target.value)}
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="landmark" className="font-medium">
-            Nearest Landmark
-          </Label>
-          <Input
-            id="landmark"
-            placeholder="E.g., Near First Bank"
-            value={address.landmark || ''}
-            onChange={(e) => handleChange('landmark', e.target.value)}
-          />
-        </div>
-      </div>
-      
-      <div className="pt-2">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-medium">Delivery Address</h3>
         <Button 
-          type="submit"
-          disabled={isVerifying}
-          variant={address.isVerified ? "outline" : "default"}
+          type="button" 
+          variant="outline"
+          onClick={handleUseCurrentLocation}
+          disabled={isLoadingLocation}
+          className="flex items-center gap-2"
+        >
+          {isLoadingLocation ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <MapPin className="h-4 w-4" />
+          )}
+          {isLoadingLocation ? "Detecting..." : "Use Current Location"}
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="street" className="text-sm font-medium">Street Address</label>
+          <Textarea
+            id="street"
+            name="street"
+            value={address.street}
+            onChange={handleChange}
+            placeholder="Enter your street address"
+            className="min-h-[80px]"
+          />
+        </div>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="city" className="text-sm font-medium">City</label>
+            <Input
+              id="city"
+              name="city"
+              value={address.city}
+              onChange={handleChange}
+              placeholder="City"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="state" className="text-sm font-medium">State</label>
+            <Input
+              id="state"
+              name="state"
+              value={address.state}
+              onChange={handleChange}
+              placeholder="State"
+            />
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="zipCode" className="text-sm font-medium">Zip/Postal Code</label>
+          <Input
+            id="zipCode"
+            name="zipCode"
+            value={address.zipCode}
+            onChange={handleChange}
+            placeholder="Postal Code"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <label htmlFor="country" className="text-sm font-medium">Country</label>
+          <Input
+            id="country"
+            name="country"
+            value={address.country}
+            onChange={handleChange}
+            placeholder="Country"
+            disabled
+          />
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between pt-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="defaultAddress"
+            checked={savedAsDefault}
+            onCheckedChange={handleSaveAsDefault}
+          />
+          <label htmlFor="defaultAddress" className="text-sm cursor-pointer">
+            Save as default address
+          </label>
+        </div>
+        
+        <Button
+          type="button"
+          onClick={handleVerifyAddress}
+          disabled={!address.street || !address.city || !address.state || isVerifying}
           className="flex items-center gap-2"
         >
           {address.isVerified ? (
             <>
-              <Check className="h-4 w-4 text-green-500" />
-              <span>Address Verified</span>
+              <CheckCircle className="h-4 w-4" />
+              Verified
+            </>
+          ) : isVerifying ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Verifying...
             </>
           ) : (
-            <span>{isVerifying ? "Verifying..." : "Verify Address"}</span>
+            "Verify Address"
           )}
         </Button>
-        
-        {address.isVerified && (
-          <p className="text-sm text-green-600 mt-2">
-            Your delivery address has been successfully verified.
-          </p>
-        )}
       </div>
-    </form>
+
+      {address.isVerified && (
+        <div className="bg-green-50 border border-green-200 rounded-md p-3 text-sm text-green-800 flex items-center">
+          <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+          This address has been verified and is eligible for delivery.
+        </div>
+      )}
+    </div>
   );
 };
 
