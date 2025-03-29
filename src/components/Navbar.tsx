@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,8 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import logo from '@/assets/mealstock-logo.png';
+import { useTheme } from '@/components/ui/theme-provider';
+import Logo from './Logo';
 import NotificationBell from './notifications/NotificationBell';
 
 const Navbar: React.FC = () => {
@@ -49,8 +48,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-white border-b border-gray-200 py-2.5">
       <div className="container-custom flex flex-wrap items-center justify-between mx-auto">
         <Link to="/" className="flex items-center">
-          <img src={logo} className="h-6 mr-3 sm:h-9" alt="MealStock logo" />
-          <span className="self-center text-xl font-semibold whitespace-nowrap">MealStock</span>
+          <Logo size="md" withText={true} />
         </Link>
         
         <div className="flex items-center md:order-2">
