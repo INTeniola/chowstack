@@ -27,7 +27,7 @@ const OrderConfirmation = () => {
         price: 2500,
         image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2940&auto=format&fit=crop',
         vendorId: 'v1',
-        vendorName: 'Mama's Kitchen',
+        vendorName: 'Mama\'s Kitchen',
       },
       {
         id: '2',
