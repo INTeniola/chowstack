@@ -1,51 +1,69 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { trackUserAction } from '@/lib/sentry';
 
-interface ConnectivityState {
+// Connection quality types
+type ConnectionQuality = 'excellent' | 'good' | 'fair' | 'slow' | 'poor';
+
+// Context type definition
+type ConnectivityContextType = {
   isOnline: boolean;
-  connectionQuality: 'unknown' | 'slow' | 'medium' | 'fast';
+  connectionQuality: ConnectionQuality;
   lowBandwidthMode: boolean;
   setLowBandwidthMode: (enabled: boolean) => void;
   lastOnlineTime: Date | null;
-}
+  dataConsumption: { images: number; fonts: number; total: number };
+};
 
-const ConnectivityContext = createContext<ConnectivityState | undefined>(undefined);
+// Default context values
+const defaultContext: ConnectivityContextType = {
+  isOnline: true,
+  connectionQuality: 'good',
+  lowBandwidthMode: false,
+  setLowBandwidthMode: () => {},
+  lastOnlineTime: null,
+  dataConsumption: { images: 0, fonts: 0, total: 0 }
+};
 
+// Create context
+const ConnectivityContext = createContext<ConnectivityContextType>(defaultContext);
+
+// Provider component
 export const ConnectivityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
-  const [connectionQuality, setConnectionQuality] = useState<'unknown' | 'slow' | 'medium' | 'fast'>('unknown');
-  const [lowBandwidthMode, setLowBandwidthMode] = useState<boolean>(() => {
-    // Try to get from localStorage
-    const saved = localStorage.getItem('lowBandwidthMode');
-    return saved ? JSON.parse(saved) : false;
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality>('good');
+  const [lowBandwidthMode, setLowBandwidthMode] = useState(() => {
+    try {
+      // Check if user previously enabled low bandwidth mode
+      const savedMode = localStorage.getItem('mealstock:lowBandwidthMode');
+      return savedMode ? JSON.parse(savedMode) : false;
+    } catch (e) {
+      return false;
+    }
   });
   const [lastOnlineTime, setLastOnlineTime] = useState<Date | null>(isOnline ? new Date() : null);
-  const { toast } = useToast();
+  const [dataConsumption, setDataConsumption] = useState({ images: 0, fonts: 0, total: 0 });
 
-  // Save low bandwidth mode choice to localStorage
+  // Save low bandwidth mode preference
   useEffect(() => {
-    localStorage.setItem('lowBandwidthMode', JSON.stringify(lowBandwidthMode));
+    try {
+      localStorage.setItem('mealstock:lowBandwidthMode', JSON.stringify(lowBandwidthMode));
+    } catch (e) {
+      console.error('Failed to save low bandwidth mode preference', e);
+    }
   }, [lowBandwidthMode]);
 
-  // Handle online/offline events
+  // Network status listeners
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       setLastOnlineTime(new Date());
-      toast({ 
-        title: "You're back online",
-        description: "Content will now sync with the server",
-      });
+      trackUserAction('connectivity_online');
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast({ 
-        title: "You're offline",
-        description: "Saved content is still available",
-        variant: "destructive",
-      });
+      trackUserAction('connectivity_offline');
     };
 
     window.addEventListener('online', handleOnline);
@@ -55,72 +73,142 @@ export const ConnectivityProvider: React.FC<{ children: React.ReactNode }> = ({ 
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [toast]);
+  }, []);
 
-  // Monitor connection quality
+  // Network quality detection
   useEffect(() => {
-    const checkConnectionQuality = () => {
-      if (typeof navigator !== 'undefined' && 'connection' in navigator) {
-        // @ts-ignore - connection property exists but TypeScript doesn't know about it
-        const connection = navigator.connection;
-        
-        if (connection) {
-          // @ts-ignore - effectiveType property exists but TypeScript doesn't know about it
-          const effectiveType = connection.effectiveType;
+    // Function to check connection quality
+    const checkConnectionQuality = async () => {
+      if (!isOnline) {
+        setConnectionQuality('poor');
+        return;
+      }
+
+      try {
+        // Use Network Information API if available
+        if ('connection' in navigator && navigator.connection) {
+          const connection = navigator.connection as any;
           
-          if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+          if (connection.effectiveType === '4g' && !connection.saveData) {
+            setConnectionQuality('excellent');
+          } else if (connection.effectiveType === '4g' && connection.saveData) {
+            setConnectionQuality('good');
+          } else if (connection.effectiveType === '3g') {
+            setConnectionQuality('fair');
+          } else if (connection.effectiveType === '2g') {
             setConnectionQuality('slow');
-          } else if (effectiveType === '3g') {
-            setConnectionQuality('medium');
-          } else if (effectiveType === '4g') {
-            setConnectionQuality('fast');
+          } else {
+            // Fallback to speed test for unknown connection types
+            await performSpeedTest();
           }
-          
-          // Recommend low bandwidth mode if connection is slow
-          if (effectiveType === 'slow-2g' || effectiveType === '2g') {
-            if (!lowBandwidthMode) {
-              toast({
-                title: "Slow connection detected",
-                description: "Consider enabling low bandwidth mode in settings",
-                duration: 5000,
-              });
-            }
-          }
+        } else {
+          // Fallback for browsers without Network Information API
+          await performSpeedTest();
         }
+      } catch (error) {
+        console.error('Error checking connection quality:', error);
+        // Assume medium quality on error
+        setConnectionQuality('fair');
+      }
+    };
+
+    // Simple speed test by loading a small image and timing it
+    const performSpeedTest = async () => {
+      const startTime = Date.now();
+      try {
+        // Load a tiny image to test connection speed
+        const response = await fetch('/favicon.ico', { cache: 'no-store' });
+        const endTime = Date.now();
+        const loadTime = endTime - startTime;
+
+        // Classify connection based on load time
+        if (loadTime < 100) {
+          setConnectionQuality('excellent');
+        } else if (loadTime < 300) {
+          setConnectionQuality('good');
+        } else if (loadTime < 750) {
+          setConnectionQuality('fair');
+        } else if (loadTime < 2000) {
+          setConnectionQuality('slow');
+        } else {
+          setConnectionQuality('poor');
+        }
+      } catch (error) {
+        console.error('Speed test failed:', error);
+        setConnectionQuality('poor');
+      }
+    };
+
+    // Check connection quality initially and on network changes
+    checkConnectionQuality();
+
+    // Recheck quality periodically and on visibility change
+    const interval = setInterval(checkConnectionQuality, 60000); // Every minute
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkConnectionQuality();
       }
     };
     
-    checkConnectionQuality();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isOnline]);
+
+  // Auto-enable low bandwidth mode for slow connections in Nigeria
+  useEffect(() => {
+    const checkForNigerianNetworks = async () => {
+      try {
+        // Note: In a real app, you would use a more reliable method to detect Nigerian networks
+        // This is just a simple simulation for demo purposes
+        
+        // If connection is slow or poor, suggest low bandwidth mode
+        if ((connectionQuality === 'slow' || connectionQuality === 'poor') && !lowBandwidthMode) {
+          const shouldEnable = window.confirm(
+            'We detected a slow connection. Would you like to enable low bandwidth mode to save data?'
+          );
+          
+          if (shouldEnable) {
+            setLowBandwidthMode(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking for Nigerian networks:', error);
+      }
+    };
     
-    // Try to listen for connection changes
-    // @ts-ignore - connection property exists but TypeScript doesn't know about it
-    const connection = navigator.connection;
-    if (connection) {
-      // @ts-ignore - addEventListener property exists but TypeScript doesn't know about it
-      connection.addEventListener('change', checkConnectionQuality);
-      return () => {
-        // @ts-ignore - removeEventListener property exists but TypeScript doesn't know about it
-        connection.removeEventListener('change', checkConnectionQuality);
-      };
+    // Only run this check once when the component mounts
+    if (isOnline) {
+      checkForNigerianNetworks();
     }
-    
-    return undefined;
-  }, [lowBandwidthMode, toast]);
+  }, [connectionQuality]);
+
+  // Create context value
+  const contextValue: ConnectivityContextType = {
+    isOnline,
+    connectionQuality,
+    lowBandwidthMode,
+    setLowBandwidthMode: (enabled: boolean) => {
+      setLowBandwidthMode(enabled);
+      trackUserAction('toggle_low_bandwidth_mode', { enabled });
+    },
+    lastOnlineTime,
+    dataConsumption
+  };
 
   return (
-    <ConnectivityContext.Provider value={{
-      isOnline,
-      connectionQuality,
-      lowBandwidthMode,
-      setLowBandwidthMode,
-      lastOnlineTime,
-    }}>
+    <ConnectivityContext.Provider value={contextValue}>
       {children}
     </ConnectivityContext.Provider>
   );
 };
 
-export const useConnectivity = (): ConnectivityState => {
+// Hook for using the connectivity context
+export const useConnectivity = () => {
   const context = useContext(ConnectivityContext);
   if (context === undefined) {
     throw new Error('useConnectivity must be used within a ConnectivityProvider');

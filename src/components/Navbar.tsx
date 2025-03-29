@@ -18,6 +18,7 @@ import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/components/ui/theme-provider';
 import Logo from './Logo';
 import NotificationBell from './notifications/NotificationBell';
+import { DataSaverDialog } from './ui/data-saver-dialog';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -52,7 +53,10 @@ const Navbar: React.FC = () => {
         </Link>
         
         <div className="flex items-center md:order-2">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {/* Add the Data Saver Dialog */}
+            <DataSaverDialog />
+            
             <NotificationBell />
             
             {user || vendor ? (
@@ -131,6 +135,9 @@ const Navbar: React.FC = () => {
             </li>
             <li>
               <Link to="/discovery" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Discovery</Link>
+            </li>
+            <li>
+              <Link to="/meal-planner" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Meal Planner</Link>
             </li>
             <li>
               <Link to="/contact" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Contact</Link>
