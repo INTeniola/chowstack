@@ -5,6 +5,7 @@ import { Check, Bell, X, Settings, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge'; // Add this missing import
 import { useNotifications } from '@/contexts/NotificationsContext';
 import NotificationItem from './NotificationItem';
 import { 
@@ -78,12 +79,12 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
       
       {notifications.length === 0 ? (
         <div className="p-6 text-center">
-          <Bell className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-50" />
-          <p className="text-sm text-muted-foreground">No notifications yet</p>
+          <Bell className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+          <p className="text-sm text-muted-foreground mb-1">No notifications yet</p>
         </div>
       ) : (
         <>
-          <ScrollArea className="h-[350px]">
+          <ScrollArea className="h-[350px] pr-4 -mr-4">
             <div className="space-y-1 p-2">
               {notifications.map((notification) => (
                 <NotificationItem 

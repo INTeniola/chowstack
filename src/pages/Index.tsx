@@ -19,7 +19,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar onOpenAuth={handleOpenAuthModal} />
+      <Navbar />
       <main className="flex-1">
         <Hero onOpenAuth={handleOpenAuthModal} />
         <Features />

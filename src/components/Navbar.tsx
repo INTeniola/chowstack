@@ -20,7 +20,7 @@ import NotificationBell from './notifications/NotificationBell';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { vendor, signOutVendor } = useVendorAuth();
+  const { vendor, logout } = useVendorAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setTheme } = useTheme();
@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
       })
       navigate('/login');
     } else if (vendor) {
-      await signOutVendor();
+      await logout();
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
@@ -54,7 +54,6 @@ const Navbar: React.FC = () => {
         
         <div className="flex items-center md:order-2">
           <div className="flex items-center gap-4">
-            {/* Add NotificationBell here */}
             <NotificationBell />
             
             {user || vendor ? (
