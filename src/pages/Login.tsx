@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { authUtils } from '@/utils/authUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,6 +37,15 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login(formData.email, formData.password);
+  };
+
+  const handleSocialLogin = async (provider: 'facebook' | 'google') => {
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
   };
 
   return (
@@ -131,14 +140,14 @@ const Login = () => {
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={() => authUtils.signInWithSocial('google')}
+                onClick={() => handleSocialLogin('google')}
               >
                 Google
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={() => authUtils.signInWithSocial('facebook')}
+                onClick={() => handleSocialLogin('facebook')}
               >
                 Facebook
               </Button>

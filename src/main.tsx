@@ -8,7 +8,7 @@ import { ThemeProvider } from "./components/ui/theme-provider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster";
 import { NotificationsProvider } from './contexts/NotificationsContext';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider } from './contexts/AuthContext';
 import { VendorAuthProvider } from './hooks/useVendorAuth';
 import { ConnectivityProvider } from './contexts/ConnectivityContext';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
