@@ -5,10 +5,12 @@ import * as React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { type ThemeProviderProps } from "next-themes/dist/types"
 
-// Create a simple theme context as a fallback
+// Define Theme type more explicitly
 type Theme = "dark" | "light" | "system" | string
+
+// Update ThemeContextType to ensure it exactly matches what we provide
 type ThemeContextType = {
-  theme: Theme | undefined
+  theme: Theme
   setTheme: (theme: Theme) => void
 }
 
@@ -47,11 +49,12 @@ export function ThemeProvider({
     root.classList.add(theme)
   }, [theme])
   
-  const value = {
+  // Ensure the value object strictly matches ThemeContextType
+  const value: ThemeContextType = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(storageKey, newTheme)
+      setTheme(newTheme)
     },
   }
 
