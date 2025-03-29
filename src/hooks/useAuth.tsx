@@ -5,19 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
 
-export interface UserPreferences {
-  notificationSettings?: {
-    email: boolean;
-    sms: boolean;
-    app: boolean;
-    voice: boolean;
-  };
-  deliveryPreferences?: {
-    timeSlot: string;
-    instructions: string;
-  };
-}
-
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -27,7 +14,6 @@ interface AuthState {
   signOut: () => void;
   signUp: (email: string, password: string, name: string, phone: string) => Promise<boolean>;
   updateUserProfile: (updates: Partial<User>) => Promise<boolean>;
-  updateUserPreferences: (updates: Partial<UserPreferences>) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -167,18 +153,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       // Also update the profiles table if needed
-      if (updates.name || updates.phone || updates.address) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            name: updates.name,
-            phone: updates.phone,
-            address: updates.address,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-
-        if (profileError) throw profileError;
+      if (updates.name || updates.phone) {
+        const result = await authUtils.updateUserProfile(user.id, updates);
+        if (!result.success) throw new Error(result.error);
       }
 
       // Update the local user state
@@ -200,44 +177,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const updateUserPreferences = async (updates: Partial<UserPreferences>) => {
-    if (!user) return false;
-
-    try {
-      const result = await authUtils.updateUserPreferences(user.id, updates);
-      
-      if (result.success) {
-        // Update local user state
-        setUser(prev => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            preferences: {
-              ...prev.preferences,
-              ...updates
-            }
-          };
-        });
-
-        toast({
-          title: "Preferences updated",
-          description: "Your preferences have been updated successfully.",
-        });
-        return true;
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error('Update preferences error:', error);
-      toast({
-        title: "Update failed",
-        description: "Failed to update preferences. Please try again later.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
   const authContextValue: AuthState = {
     user,
     isAuthenticated,
@@ -247,7 +186,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     signUp,
     updateUserProfile,
-    updateUserPreferences,
   };
 
   return (

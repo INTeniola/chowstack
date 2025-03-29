@@ -9,22 +9,6 @@ export interface User {
   phone?: string;
   name: string;
   role: 'customer' | 'vendor';
-  preferences?: UserPreferences;
-}
-
-export interface UserPreferences {
-  dietaryRestrictions?: string[];
-  favoriteItems?: string[];
-  deliveryAddress?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    };
-  };
 }
 
 // Auth state types
@@ -150,35 +134,23 @@ export const authUtils = {
     }
   },
   
-  // Update user preferences
-  updateUserPreferences: async (userId: string, preferences: Partial<UserPreferences>) => {
+  // Update user profile
+  updateUserProfile: async (userId: string, updates: Partial<User>) => {
     try {
-      // Get the current user data
-      const { data: currentUserData, error: fetchError } = await supabase
+      // Update the user's profile in Supabase
+      const { error } = await supabase
         .from('profiles')
-        .select('preferences')
-        .eq('id', userId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      // Merge the current preferences with the new ones
-      const updatedPreferences = {
-        ...(currentUserData?.preferences || {}),
-        ...preferences
-      };
-      
-      // Update the user's preferences
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ preferences: updatedPreferences })
+        .update({
+          name: updates.name,
+          phone: updates.phone
+        })
         .eq('id', userId);
       
-      if (updateError) throw updateError;
+      if (error) throw error;
       
       return { success: true };
     } catch (error) {
-      console.error('Update user preferences error:', error);
+      console.error('Update user profile error:', error);
       return { 
         success: false, 
         error: (error as any).message 
