@@ -1,0 +1,157 @@
+
+import { MealPackage } from '@/components/MealPackageCard';
+
+// Mock data for the meal packages
+export const mockMealPackages: MealPackage[] = [
+  {
+    id: '1',
+    name: 'Nigerian Classics Bundle',
+    description: 'A collection of classic Nigerian dishes including Jollof Rice, Egusi Soup, and Pounded Yam.',
+    imageUrl: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=2940&auto=format&fit=crop',
+    price: 24999,
+    singleMealPrice: 3500,
+    rating: 4.8,
+    reviewCount: 256,
+    deliveryTime: 45,
+    mealCount: 8,
+    cuisineType: ['Nigerian', 'West African'],
+    vendorName: "Mama's Kitchen",
+    vendorId: 'v1',
+    dietaryTags: ['Halal']
+  },
+  {
+    id: '2',
+    name: 'West African Variety Pack',
+    description: 'Explore the best of West African cuisine with this variety pack featuring dishes from Nigeria, Ghana, and Senegal.',
+    imageUrl: 'https://images.unsplash.com/photo-1619057883177-e3bea8196f25?q=80&w=2787&auto=format&fit=crop',
+    price: 28999,
+    singleMealPrice: 4000,
+    rating: 4.6,
+    reviewCount: 189,
+    deliveryTime: 50,
+    mealCount: 8,
+    cuisineType: ['West African', 'Nigerian', 'Ghanaian'],
+    vendorName: 'AfroEats',
+    vendorId: 'v2',
+    dietaryTags: []
+  },
+  {
+    id: '3',
+    name: 'Healthy Nigerian Meals',
+    description: 'Nutritious and healthy Nigerian meals with reduced oil and carefully balanced macros.',
+    imageUrl: 'https://images.unsplash.com/photo-1590167379920-a54c77dc4c9e?q=80&w=2940&auto=format&fit=crop',
+    price: 26999,
+    singleMealPrice: 3800,
+    rating: 4.5,
+    reviewCount: 142,
+    deliveryTime: 40,
+    mealCount: 8,
+    cuisineType: ['Nigerian', 'Healthy'],
+    vendorName: 'FitNaija',
+    vendorId: 'v3',
+    dietaryTags: ['Gluten Free', 'Low Carb']
+  },
+  {
+    id: '4',
+    name: 'Premium Seafood Package',
+    description: 'Fresh seafood dishes featuring prawns, fish, and shellfish prepared in traditional Nigerian style.',
+    imageUrl: 'https://images.unsplash.com/photo-1512838243191-e81e8f66f1fd?q=80&w=2940&auto=format&fit=crop',
+    price: 34999,
+    singleMealPrice: 4500,
+    rating: 4.9,
+    reviewCount: 112,
+    deliveryTime: 60,
+    mealCount: 8,
+    cuisineType: ['Nigerian', 'Seafood'],
+    vendorName: 'Ocean Basket Nigeria',
+    vendorId: 'v4',
+    dietaryTags: []
+  },
+  {
+    id: '5',
+    name: 'International Fusion',
+    description: 'A blend of international cuisine with Nigerian twists, featuring Chinese, Italian, and Indian inspired dishes.',
+    imageUrl: 'https://images.unsplash.com/photo-1547496502-affa22d38842?q=80&w=2677&auto=format&fit=crop',
+    price: 29999,
+    singleMealPrice: 4200,
+    rating: 4.4,
+    reviewCount: 98,
+    deliveryTime: 55,
+    mealCount: 8,
+    cuisineType: ['International', 'Fusion', 'Nigerian'],
+    vendorName: 'Global Flavors',
+    vendorId: 'v5',
+    dietaryTags: []
+  },
+  {
+    id: '6',
+    name: 'Vegetarian Nigerian Bundle',
+    description: 'Delicious vegetarian versions of popular Nigerian dishes, full of flavor and nutrition.',
+    imageUrl: 'https://images.unsplash.com/photo-1611270629569-8b357cb88da9?q=80&w=2787&auto=format&fit=crop',
+    price: 22999,
+    singleMealPrice: 3200,
+    rating: 4.7,
+    reviewCount: 76,
+    deliveryTime: 40,
+    mealCount: 8,
+    cuisineType: ['Nigerian', 'Vegetarian'],
+    vendorName: 'Green Plate',
+    vendorId: 'v6',
+    dietaryTags: ['Vegetarian', 'Vegan Options']
+  }
+];
+
+// Mock data for weekly specials
+export const mockWeeklySpecials: MealPackage[] = [
+  {
+    id: 's1',
+    name: 'Weekend Family Feast',
+    description: 'Perfect for weekend family gatherings, this package includes Jollof Rice, Pounded Yam, Egusi, and Peppered Fish.',
+    imageUrl: 'https://images.unsplash.com/photo-1577106263724-2c8e03bfe9cf?q=80&w=2940&auto=format&fit=crop',
+    price: 39999,
+    singleMealPrice: 6000,
+    rating: 4.9,
+    reviewCount: 124,
+    deliveryTime: 60,
+    mealCount: 10,
+    featured: true,
+    cuisineType: ['Nigerian', 'Family Size'],
+    vendorName: 'Family Delight',
+    vendorId: 'v1',
+    dietaryTags: []
+  },
+  {
+    id: 's2',
+    name: 'Office Lunch Bundle',
+    description: 'Convenient meals for busy professionals. Includes a variety of Nigerian and Continental options.',
+    imageUrl: 'https://images.unsplash.com/photo-1580554530778-5f0f827d36d8?q=80&w=2830&auto=format&fit=crop',
+    price: 32999,
+    singleMealPrice: 4500,
+    rating: 4.7,
+    reviewCount: 89,
+    deliveryTime: 45,
+    mealCount: 10,
+    featured: true,
+    cuisineType: ['Nigerian', 'Continental'],
+    vendorName: 'WorkDay Eats',
+    vendorId: 'v3',
+    dietaryTags: []
+  },
+  {
+    id: 's3',
+    name: 'Student Saver Pack',
+    description: 'Affordable and filling meals designed for students on a budget. Great variety and value.',
+    imageUrl: 'https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?q=80&w=2940&auto=format&fit=crop',
+    price: 18999,
+    singleMealPrice: 2800,
+    rating: 4.5,
+    reviewCount: 215,
+    deliveryTime: 40,
+    mealCount: 8,
+    featured: true,
+    cuisineType: ['Nigerian', 'Budget Friendly'],
+    vendorName: 'Campus Meals',
+    vendorId: 'v5',
+    dietaryTags: []
+  }
+];
