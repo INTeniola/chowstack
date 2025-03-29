@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -35,8 +34,8 @@ const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   address: z.string().optional(),
   accountType: z.enum(["customer", "vendor"]),
-  termsAccepted: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the Terms of Service" }),
+  termsAccepted: z.boolean().refine(val => val === true, {
+    message: "You must accept the Terms of Service"
   }),
 });
 
@@ -49,7 +48,6 @@ const Register = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  // Create form
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -63,17 +61,14 @@ const Register = () => {
     }
   });
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
-  // Watch password to calculate strength
   const password = form.watch("password");
   
-  // Update password strength when password changes
   useEffect(() => {
     setPasswordStrength(checkPasswordStrength(password));
   }, [password]);
@@ -87,7 +82,6 @@ const Register = () => {
     }
     
     try {
-      // Map form values to SignUpData
       const signUpData: SignUpData = {
         email: values.email,
         password: values.password,
@@ -104,8 +98,6 @@ const Register = () => {
         toast.success("Account created successfully", {
           description: "Welcome to MealStock!"
         });
-        // For standard email/password auth, direct to login page
-        // For social auth or passwordless, will be handled in callback
         navigate('/login');
       }
     } catch (error: any) {
@@ -120,8 +112,7 @@ const Register = () => {
     setPasswordStrength(checkPasswordStrength(newPassword));
     toast.success("Secure password generated! Make sure to save it somewhere safe.");
   };
-  
-  // Get color based on password strength
+
   const getStrengthColor = () => {
     if (passwordStrength <= 1) return "bg-red-500";
     if (passwordStrength <= 3) return "bg-yellow-500";
@@ -262,7 +253,6 @@ const Register = () => {
                               </div>
                             </FormControl>
                             
-                            {/* Password strength indicator */}
                             {field.value && (
                               <div className="mt-2">
                                 <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
