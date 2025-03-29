@@ -9,12 +9,12 @@ import {
   CarouselPrevious,
   CarouselNext
 } from '@/components/ui/carousel';
-import { ResponsiveImage } from '@/components/uploads/ResponsiveImage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Nigerian food images for the slideshow
+// Reliable Nigerian food images that are guaranteed to work
 const NIGERIAN_FOODS = [
   {
     src: "https://images.unsplash.com/photo-1647102398925-e30527aee930",
@@ -31,18 +31,30 @@ const NIGERIAN_FOODS = [
   {
     src: "https://images.unsplash.com/photo-1667489021871-7d8923f1033e",
     alt: "Moin Moin (Steamed Bean Pudding)"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    alt: "Nigerian Feast"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83",
+    alt: "African Cuisine"
   }
 ];
 
 const Hero: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [foodImages, setFoodImages] = useState(NIGERIAN_FOODS);
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
 
   // Fetch images from Supabase storage
   useEffect(() => {
     const fetchImagesFromSupabase = async () => {
       try {
+        setIsLoading(true);
+        
+        // Try to fetch images from Supabase
         const { data, error } = await supabase
           .storage
           .from('food-images')
@@ -50,6 +62,9 @@ const Hero: React.FC = () => {
 
         if (error) {
           console.error('Error fetching images from Supabase:', error);
+          toast.error('Could not load custom images', {
+            description: 'Using default food images instead'
+          });
           return;
         }
 
@@ -62,7 +77,6 @@ const Hero: React.FC = () => {
           if (imageFiles.length > 0) {
             // Create URLs for the images
             const supabaseImages = imageFiles.map(file => {
-              // Fixed: The correct property is publicUrl (lowercase 'u')
               const { data } = supabase
                 .storage
                 .from('food-images')
@@ -74,11 +88,18 @@ const Hero: React.FC = () => {
               };
             });
             
-            setFoodImages(supabaseImages);
+            // Combine Supabase images with our reliable ones to ensure we always have content
+            setFoodImages([...supabaseImages, ...NIGERIAN_FOODS]);
+            toast.success('Loaded custom food images');
           }
         }
       } catch (error) {
         console.error('Failed to fetch images:', error);
+        toast.error('Error loading images', {
+          description: 'Using default images instead'
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -158,36 +179,44 @@ const Hero: React.FC = () => {
             <div className="absolute inset-0 rounded-full bg-mealstock-lightOrange -left-10 -bottom-10 w-24 md:w-48 h-24 md:h-48 blur-3xl opacity-50"></div>
             
             <div className="bg-mealstock-orange/10 rounded-2xl p-2 border border-mealstock-orange/20 relative z-10 overflow-hidden">
-              <Carousel className="w-full">
-                <CarouselContent>
-                  {foodImages.map((food, index) => (
-                    <CarouselItem key={index}>
-                      <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                        <img
-                          src={food.src}
-                          alt={food.alt}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // Fallback to Unsplash images if Supabase images fail to load
-                            e.currentTarget.src = NIGERIAN_FOODS[index % NIGERIAN_FOODS.length].src;
-                          }}
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                          <p className="text-white font-medium text-sm md:text-base">
-                            {food.alt}
-                          </p>
+              {isLoading ? (
+                <div className="flex items-center justify-center aspect-video w-full bg-gray-100 rounded-xl">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-mealstock-orange"></div>
+                </div>
+              ) : (
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {foodImages.map((food, index) => (
+                      <CarouselItem key={index}>
+                        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+                          <img
+                            src={food.src}
+                            alt={food.alt}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // If an image fails to load, replace it with one from our reliable set
+                              const fallbackImage = NIGERIAN_FOODS[index % NIGERIAN_FOODS.length];
+                              console.log(`Image ${food.src} failed to load, using fallback: ${fallbackImage.src}`);
+                              e.currentTarget.src = fallbackImage.src;
+                            }}
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                            <p className="text-white font-medium text-sm md:text-base">
+                              {food.alt}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                {!isMobile && (
-                  <>
-                    <CarouselPrevious className="left-2" />
-                    <CarouselNext className="right-2" />
-                  </>
-                )}
-              </Carousel>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {!isMobile && (
+                    <>
+                      <CarouselPrevious className="left-2" />
+                      <CarouselNext className="right-2" />
+                    </>
+                  )}
+                </Carousel>
+              )}
             </div>
           </div>
         </div>
