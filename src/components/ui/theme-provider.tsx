@@ -30,15 +30,17 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => {
       // Get the stored theme or use default
-      const storedTheme = localStorage.getItem(storageKey)
-      
-      // Validate that the stored theme is one of our valid Theme values
-      if (storedTheme === "dark" || storedTheme === "light" || storedTheme === "system") {
-        return storedTheme
+      if (typeof window !== 'undefined') {
+        const storedTheme = localStorage.getItem(storageKey)
+        
+        // Validate that the stored theme is one of our valid Theme values
+        if (storedTheme === "dark" || storedTheme === "light" || storedTheme === "system") {
+          return storedTheme as Theme
+        }
       }
       
-      // If not valid, return the default theme
-      return defaultTheme
+      // If not valid or no window, return the default theme
+      return defaultTheme as Theme
     }
   )
 
