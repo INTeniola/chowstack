@@ -124,10 +124,9 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const channel = supabase.channel(`table-changes:${table}`);
     
-    // Fixed the event type issue by updating the subscription method
     channel.on(
       'postgres_changes',
-      { 
+      {
         event: event,
         schema: 'public',
         table: table

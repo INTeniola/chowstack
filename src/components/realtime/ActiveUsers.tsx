@@ -64,24 +64,25 @@ export const ActiveUsers: React.FC<ActiveUsersProps> = ({
         }
         
         // Get user profiles
-        const { data: profiles, error: profilesError } = await supabase
-          .from('users')  // Changed from 'profiles' to 'users'
-          .select('id, full_name, avatar_url')  // Changed 'name' to 'full_name'
+        const { data: userProfiles, error: profilesError } = await supabase
+          .from('users')
+          .select('id, full_name, avatar_url')
           .in('id', filteredUserIds);
           
         if (profilesError) throw profilesError;
         
-        if (profiles) {
+        if (userProfiles) {
           // Map the returned data to match our User interface
-          const mappedUsers: User[] = profiles.map(profile => ({
+          const mappedUsers: User[] = userProfiles.map(profile => ({
             id: profile.id,
-            name: profile.full_name,  // Map full_name to name
+            name: profile.full_name || 'Unknown User',
             avatar_url: profile.avatar_url
           }));
           setUsers(mappedUsers);
         }
       } catch (error) {
         console.error('Error fetching user info:', error);
+        setUsers([]);
       } finally {
         setLoading(false);
       }

@@ -70,7 +70,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             message: item.content,
             timestamp: new Date(item.created_at),
             read: item.read,
-            actionUrl: item.action_url || undefined, // Handle nullable field
+            actionUrl: undefined, // This field doesn't exist in our schema
             orderId: item.related_id,
             recipientId: item.user_id
           })));
@@ -92,7 +92,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           message: payload.new.content,
           timestamp: new Date(payload.new.created_at),
           read: payload.new.read,
-          actionUrl: payload.new.action_url || undefined, // Handle nullable field
+          actionUrl: undefined, // This field doesn't exist in our schema
           orderId: payload.new.related_id,
           recipientId: payload.new.user_id
         };
@@ -100,13 +100,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         setNotifications(prev => [newNotification, ...prev]);
         
         // Show toast for new notification
-        toast({
-          description: (
-            <div>
-              <div className="font-medium">{newNotification.title}</div>
-              <div className="text-sm">{newNotification.message}</div>
-            </div>
-          )
+        toast(newNotification.title, {
+          description: newNotification.message
         });
       }
     });
@@ -208,8 +203,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       isDriverMessage
     );
     
-    // We just need to fulfill the Promise<void> return type,
-    // so we don't need to return the response
+    // Converting Promise<string> to Promise<void>
   };
   
   return (

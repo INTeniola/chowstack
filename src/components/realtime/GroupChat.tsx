@@ -95,18 +95,27 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
           // Then, fetch sender info separately for each message
           const messagesWithSenders = await Promise.all(
             data.map(async (msg) => {
-              // Get sender info
-              const { data: senderData, error: senderError } = await supabase
-                .from('users')  // Changed from 'profiles' to 'users'
-                .select('full_name, avatar_url') // Changed 'name' to 'full_name'
-                .eq('id', msg.sender_id)
-                .single();
-              
-              return {
-                ...msg,
-                senderName: senderError ? 'Unknown User' : senderData?.full_name, // Changed to full_name
-                senderAvatar: senderError ? undefined : senderData?.avatar_url
-              };
+              try {
+                // Get sender info
+                const { data: senderData, error: senderError } = await supabase
+                  .from('users')
+                  .select('full_name, avatar_url')
+                  .eq('id', msg.sender_id)
+                  .single();
+                
+                return {
+                  ...msg,
+                  senderName: senderError ? 'Unknown User' : (senderData?.full_name || 'Unknown User'),
+                  senderAvatar: senderError ? undefined : senderData?.avatar_url
+                };
+              } catch (err) {
+                console.error('Error fetching sender info:', err);
+                return {
+                  ...msg,
+                  senderName: 'Unknown User',
+                  senderAvatar: undefined
+                };
+              }
             })
           );
           
@@ -136,29 +145,41 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
       if (payload.new && payload.new.group_id === groupId) {
         // Fetch the sender info
         const fetchSenderInfo = async () => {
-          const { data, error } = await supabase
-            .from('users')  // Changed from 'profiles' to 'users'
-            .select('full_name, avatar_url') // Changed 'name' to 'full_name'
-            .eq('id', payload.new.sender_id)
-            .single();
-            
-          if (!error && data) {
+          try {
+            const { data, error } = await supabase
+              .from('users')
+              .select('full_name, avatar_url')
+              .eq('id', payload.new.sender_id)
+              .single();
+              
+            if (!error && data) {
+              const message = {
+                ...payload.new,
+                senderName: data.full_name || 'Unknown User',
+                senderAvatar: data.avatar_url
+              };
+              
+              setMessages(prev => [...prev, message]);
+              scrollToBottom();
+              
+              // Mark as read if not from current user
+              if (payload.new.sender_id !== user.id) {
+                await supabase
+                  .from('messages')
+                  .update({ read: true })
+                  .eq('id', payload.new.id);
+              }
+            }
+          } catch (err) {
+            console.error('Error in fetchSenderInfo:', err);
             const message = {
               ...payload.new,
-              senderName: data.full_name, // Changed to full_name
-              senderAvatar: data.avatar_url
+              senderName: 'Unknown User',
+              senderAvatar: undefined
             };
             
             setMessages(prev => [...prev, message]);
             scrollToBottom();
-            
-            // Mark as read if not from current user
-            if (payload.new.sender_id !== user.id) {
-              await supabase
-                .from('messages')
-                .update({ read: true })
-                .eq('id', payload.new.id);
-            }
           }
         };
         
@@ -214,7 +235,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
           created_at: new Date().toISOString(),
           read: false,
           senderName: user.name || 'You',
-          senderAvatar: user.avatarUrl // Changed from avatar to avatarUrl
+          senderAvatar: user.avatarUrl
         }
       ]);
       

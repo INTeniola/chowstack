@@ -26,6 +26,11 @@ interface CommunityGroup {
   created_at: string;
 }
 
+interface GroupMember {
+  group_id: string;
+  user_id: string;
+}
+
 const CommunityHub: React.FC = () => {
   const { user } = useAuth();
   const { subscribe } = useRealtime();
@@ -73,7 +78,7 @@ const CommunityHub: React.FC = () => {
     fetchUserGroups();
     
     // Subscribe to group member changes
-    const unsubscribe = subscribe<{ group_id: string; user_id: string }>('group_members', 'INSERT', (payload) => {
+    const unsubscribe = subscribe<GroupMember>('group_members', 'INSERT', (payload) => {
       if (payload.new && payload.new.user_id === user?.id) {
         // Fetch the group details
         const fetchGroupDetails = async () => {
@@ -103,7 +108,12 @@ const CommunityHub: React.FC = () => {
     };
   }, [user, subscribe]);
   
-  const handleCreateGroup = async (groupData: any) => {
+  const handleCreateGroup = async (groupData: {
+    name: string;
+    description: string;
+    location?: string;
+    coordinates?: { lat: number; lng: number };
+  }) => {
     if (!user) return;
     
     try {
