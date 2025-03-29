@@ -27,6 +27,7 @@ import HelpCenter from "./pages/HelpCenter";
 import Blog from "./pages/Blog";
 import FAQs from "./pages/FAQs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Settings from "./pages/Settings";
 
 const App = () => {
   const { isOnline, lowBandwidthMode } = useConnectivity();
@@ -46,6 +47,7 @@ const App = () => {
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/settings" element={<Settings />} />
             
             {/* New Routes */}
             <Route path="/about" element={<About />} />

@@ -14,11 +14,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Settings } from 'lucide-react';
 import { useTheme } from '@/components/ui/theme-provider';
 import Logo from './Logo';
 import NotificationBell from './notifications/NotificationBell';
-import { DataSaverDialog } from './ui/data-saver-dialog';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -54,9 +53,6 @@ const Navbar: React.FC = () => {
         
         <div className="flex items-center md:order-2">
           <div className="flex items-center gap-2">
-            {/* Add the Data Saver Dialog */}
-            <DataSaverDialog />
-            
             <NotificationBell />
             
             {user || vendor ? (
@@ -88,11 +84,12 @@ const Navbar: React.FC = () => {
                       Dashboard
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate(user ? '/orders' : '/vendor/orders')}>
                     Orders
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
