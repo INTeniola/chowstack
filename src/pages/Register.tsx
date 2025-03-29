@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Mail, Lock, User, Phone, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, RefreshCw, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { generateSecurePassword, checkPasswordStrength } from '@/utils/passwordUtils';
 import { toast } from 'sonner';
@@ -16,6 +16,7 @@ const Register = () => {
   const { signUp, isAuthenticated, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -25,7 +26,7 @@ const Register = () => {
   });
 
   // Redirect if already authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
     }
@@ -42,11 +43,35 @@ const Register = () => {
     if (name === 'password') {
       setPasswordStrength(checkPasswordStrength(value));
     }
+    
+    // Clear error when user types
+    if (error) {
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signUp(formData.email, formData.password, formData.name, formData.phone);
+    setError(null);
+    
+    if (passwordStrength <= 1) {
+      setError("Please use a stronger password for better security");
+      return;
+    }
+    
+    try {
+      const success = await signUp(formData.email, formData.password, formData.name, formData.phone);
+      
+      if (success) {
+        toast.success("Account created successfully", {
+          description: "Welcome to MealStock!"
+        });
+        navigate('/login');
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setError(error?.message || "Failed to create account. Please try again.");
+    }
   };
   
   const handleGeneratePassword = () => {
@@ -81,6 +106,13 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="bg-destructive/15 p-3 rounded-md flex items-start mb-4 text-sm border border-destructive">
+                <AlertCircle className="h-4 w-4 text-destructive mr-2 mt-0.5 flex-shrink-0" />
+                <span className="text-destructive">{error}</span>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">

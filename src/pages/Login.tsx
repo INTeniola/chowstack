@@ -13,6 +13,7 @@ import { generateSecurePassword } from '@/utils/passwordUtils';
 import { toast } from 'sonner';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const Login = () => {
     password: ''
   });
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -37,20 +39,52 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error when user types
+    if (error) {
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(formData.email, formData.password);
+    setError(null); // Clear any previous errors
+    
+    try {
+      const success = await login(formData.email, formData.password);
+      
+      if (success) {
+        toast.success("Login successful", {
+          description: "Welcome back to MealStock!"
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Authentication failed. Please check your credentials and try again.");
+    }
   };
 
   const handleSocialLogin = async (provider: 'facebook' | 'google') => {
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
+      if (error) {
+        setError(error.message);
+        toast.error("Social login failed", {
+          description: error.message
+        });
       }
-    });
+    } catch (error: any) {
+      console.error("Social login error:", error);
+      setError(error?.message || "Failed to login with social provider");
+    }
   };
   
   const handleGeneratePassword = () => {
@@ -84,6 +118,13 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="bg-destructive/15 p-3 rounded-md flex items-start mb-4 text-sm border border-destructive">
+                <AlertCircle className="h-4 w-4 text-destructive mr-2 mt-0.5 flex-shrink-0" />
+                <span className="text-destructive">{error}</span>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
