@@ -22,7 +22,7 @@ const chefs = [
     name: 'Chef Emeka Okafor',
     role: 'Head of Menu Development',
     specialties: ['Fusion Cuisine', 'Health-Focused Meals', 'Vegetarian'],
-    bio: 'Chef Emeka specializes in nutritionally balanced meals that don't compromise on flavor. His background in nutritional science informs his approach to creating healthy, satisfying meal plans.',
+    bio: 'Chef Emeka specializes in nutritionally balanced meals that don\'t compromise on flavor. His background in nutritional science informs his approach to creating healthy, satisfying meal plans.',
     awards: ['Nutrition Excellence Award', 'Young Chef of the Year 2021'],
     avatar: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d'
   },
@@ -31,7 +31,7 @@ const chefs = [
     name: 'Chef Fatima Ibrahim',
     role: 'Pastry Chef',
     specialties: ['Desserts', 'Gluten-Free Baking', 'Traditional Sweets'],
-    bio: 'Chef Fatima transforms traditional Nigerian desserts into modern masterpieces. She's passionate about using local ingredients to create globally-inspired sweet treats that complement our meal offerings.',
+    bio: 'Chef Fatima transforms traditional Nigerian desserts into modern masterpieces. She\'s passionate about using local ingredients to create globally-inspired sweet treats that complement our meal offerings.',
     awards: ['Pastry Perfection Award', 'Innovation in Desserts 2023'],
     avatar: 'https://images.unsplash.com/photo-1481089613954-ca49bdddf431'
   },

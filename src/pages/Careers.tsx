@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ const positions = [
     location: 'Lagos, Nigeria',
     type: 'Full-time',
     salary: '₦350,000 - ₦500,000',
-    description: 'We're looking for an experienced chef to join our culinary team and help develop new menu items while maintaining our high standards for existing recipes.',
+    description: 'We\'re looking for an experienced chef to join our culinary team and help develop new menu items while maintaining our high standards for existing recipes.',
     requirements: [
       'Minimum 5 years professional cooking experience',
       'Strong knowledge of Nigerian cuisine',
@@ -31,7 +31,7 @@ const positions = [
     salary: '₦400,000 - ₦600,000',
     description: 'Oversee our meal delivery operations in Abuja, ensuring timely preparation, packaging, and delivery of orders while optimizing processes and maintaining quality.',
     requirements: [
-      'Bachelor's degree in business, operations, or related field',
+      'Bachelor\'s degree in business, operations, or related field',
       'Minimum 3 years experience in food service operations',
       'Strong problem-solving and decision-making abilities',
       'Experience with logistics and supply chain management',
@@ -61,7 +61,7 @@ const positions = [
     salary: '₦300,000 - ₦450,000',
     description: 'Drive growth through creative marketing campaigns, content creation, and community engagement, with a focus on digital marketing channels relevant to the Nigerian market.',
     requirements: [
-      'Bachelor's degree in Marketing or related field',
+      'Bachelor\'s degree in Marketing or related field',
       'Minimum 2 years of marketing experience, preferably in food service',
       'Strong understanding of digital marketing channels',
       'Experience with social media management and content creation',

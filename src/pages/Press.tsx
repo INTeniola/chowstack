@@ -26,7 +26,7 @@ const pressReleases = [
     id: 3,
     title: 'MealStock Launches New Mobile App with Enhanced Meal Planning Features',
     date: 'November 22, 2022',
-    summary: 'MealStock's new mobile application introduces AI-powered meal recommendations and allows customers to plan deliveries up to three months in advance.',
+    summary: 'MealStock\'s new mobile application introduces AI-powered meal recommendations and allows customers to plan deliveries up to three months in advance.',
     link: '#'
   }
 ];
@@ -53,7 +53,7 @@ const newsFeatures = [
     title: '30 Under 30: MealStock Founder Named Among Top Young Entrepreneurs',
     publication: 'Forbes Africa',
     date: 'February 10, 2023',
-    summary: 'MealStock's founder has been recognized for creating a business that tackles food waste while providing convenience to thousands of Nigerians.',
+    summary: 'MealStock\'s founder has been recognized for creating a business that tackles food waste while providing convenience to thousands of Nigerians.',
     link: '#'
   }
 ];
