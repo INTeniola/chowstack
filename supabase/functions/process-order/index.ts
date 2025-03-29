@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.3';
 
@@ -45,16 +44,65 @@ serve(async (req) => {
     const estimatedDeliveryDate = new Date();
     estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 1); // Next day delivery
 
-    // 3. Process payment (mock implementation)
-    // In a real system, this would connect to a payment gateway like Stripe
-    const paymentResult = {
-      success: true,
-      transaction_id: `txn_${crypto.randomUUID().substring(0, 8)}`,
-      amount: order.total_amount
-    };
-
-    if (!paymentResult.success) {
-      throw new Error('Payment processing failed');
+    // 3. Check payment status or initiate payment
+    let paymentStatus = 'pending';
+    let paymentReference = '';
+    
+    if (paymentDetails) {
+      // For prepaid methods (Paystack, Flutterwave, Mobile Money)
+      if (['paystack', 'flutterwave', 'mobile_money'].includes(order.payment_method)) {
+        // Record pending payment in database
+        const { data: paymentData, error: paymentError } = await supabase
+          .from('pending_payments')
+          .insert({
+            reference: paymentDetails.reference || `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            amount: order.total_amount,
+            currency: paymentDetails.currency || 'NGN',
+            customer_email: paymentDetails.email,
+            payment_method: order.payment_method,
+            status: 'pending',
+            metadata: {
+              orderId: order.id,
+              userId: order.user_id,
+              items: order.items.map(item => ({ id: item.meal_id, quantity: item.quantity }))
+            }
+          })
+          .select()
+          .single();
+        
+        if (paymentError) throw paymentError;
+        
+        paymentReference = paymentData.reference;
+      } 
+      // For bank transfers, create payment record but keep pending
+      else if (order.payment_method === 'bank_transfer') {
+        const { data: paymentData, error: paymentError } = await supabase
+          .from('pending_payments')
+          .insert({
+            reference: `BT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            amount: order.total_amount,
+            currency: 'NGN',
+            customer_email: paymentDetails.email,
+            payment_method: 'bank_transfer',
+            status: 'pending',
+            metadata: {
+              orderId: order.id,
+              userId: order.user_id,
+              items: order.items.map(item => ({ id: item.meal_id, quantity: item.quantity }))
+            }
+          })
+          .select()
+          .single();
+        
+        if (paymentError) throw paymentError;
+        
+        paymentReference = paymentData.reference;
+      }
+      // For cash on delivery, mark as pending but approve order
+      else if (order.payment_method === 'cash_on_delivery') {
+        paymentStatus = 'cod_pending';
+        paymentReference = `COD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      }
     }
 
     // 4. Create the order in the database
@@ -67,8 +115,8 @@ serve(async (req) => {
         delivery_date: estimatedDeliveryDate.toISOString(),
         delivery_address: order.delivery_address,
         payment_method: order.payment_method,
-        payment_status: 'paid',
-        status: 'preparing'
+        payment_status: paymentStatus,
+        status: paymentStatus === 'cod_pending' ? 'processing' : 'pending'
       })
       .select()
       .single();
@@ -98,15 +146,34 @@ serve(async (req) => {
         user_id: order.user_id,
         type: 'orderStatus',
         title: 'Order Confirmed',
-        content: `Your order #${createdOrder.id} has been confirmed and is being prepared.`,
+        content: `Your order #${createdOrder.id} has been confirmed. ${paymentStatus === 'pending' ? 'Please complete payment to proceed.' : 'It is being prepared.'}`,
         related_id: createdOrder.id
+      });
+
+    // 7. Log the transaction
+    await supabase
+      .from('payment_logs')
+      .insert({
+        payment_reference: paymentReference,
+        event_type: 'order_created',
+        status: paymentStatus,
+        amount: order.total_amount,
+        provider: order.payment_method,
+        details: {
+          order_id: createdOrder.id,
+          items: orderItems.length,
+          payment_method: order.payment_method
+        }
       });
 
     return new Response(
       JSON.stringify({
         success: true,
         order: createdOrder,
-        payment: paymentResult,
+        payment: {
+          status: paymentStatus,
+          reference: paymentReference
+        },
         message: 'Order processed successfully'
       }),
       { headers: { 'Content-Type': 'application/json', ...corsHeaders } }

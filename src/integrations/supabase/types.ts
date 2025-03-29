@@ -645,6 +645,78 @@ export type Database = {
           },
         ]
       }
+      payment_logs: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          payment_reference: string
+          provider: string | null
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          payment_reference: string
+          provider?: string | null
+          status: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          payment_reference?: string
+          provider?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      pending_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string
+          id: string
+          metadata: Json | null
+          payment_method: string
+          reference: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          customer_email: string
+          id?: string
+          metadata?: Json | null
+          payment_method: string
+          reference: string
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string
+          reference?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       presence: {
         Row: {
           id: string

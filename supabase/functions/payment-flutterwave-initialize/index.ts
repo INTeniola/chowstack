@@ -1,8 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const PAYSTACK_SECRET_KEY = Deno.env.get('PAYSTACK_SECRET_KEY');
-const PAYSTACK_API_URL = "https://api.paystack.co";
+const FLUTTERWAVE_SECRET_KEY = Deno.env.get('FLUTTERWAVE_SECRET_KEY');
+const FLUTTERWAVE_API_URL = "https://api.flutterwave.com/v3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,58 +22,62 @@ serve(async (req) => {
       reference,
       callback_url,
       metadata,
-      currency = "NGN"
+      currency = "NGN",
+      customer
     } = await req.json();
     
-    if (!PAYSTACK_SECRET_KEY) {
-      throw new Error("PAYSTACK_SECRET_KEY is not set");
+    if (!FLUTTERWAVE_SECRET_KEY) {
+      throw new Error("FLUTTERWAVE_SECRET_KEY is not set");
     }
 
-    console.log("Initializing Paystack payment for:", email);
+    console.log("Initializing Flutterwave payment for:", email);
 
-    // Convert amount to kobo (Paystack accepts amount in the smallest currency unit)
-    const amountInKobo = Math.round(amount * 100);
+    // Prepare the payment payload
+    const paymentPayload = {
+      tx_ref: reference || `FLW-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      amount,
+      currency,
+      redirect_url: callback_url,
+      customer: {
+        email,
+        name: customer?.name || 'Customer',
+        phonenumber: customer?.phone || ''
+      },
+      meta: metadata || {}
+    };
 
-    // Call Paystack API to initialize transaction
-    const paystackResponse = await fetch(`${PAYSTACK_API_URL}/transaction/initialize`, {
+    // Call Flutterwave API to initialize transaction
+    const flutterwaveResponse = await fetch(`${FLUTTERWAVE_API_URL}/payments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${PAYSTACK_SECRET_KEY}`
+        "Authorization": `Bearer ${FLUTTERWAVE_SECRET_KEY}`
       },
-      body: JSON.stringify({
-        amount: amountInKobo,
-        email,
-        currency,
-        reference,
-        callback_url,
-        metadata
-      })
+      body: JSON.stringify(paymentPayload)
     });
 
-    if (!paystackResponse.ok) {
-      const errorText = await paystackResponse.text();
-      console.error("Paystack API error:", errorText);
-      throw new Error(`Paystack API error: ${paystackResponse.status} ${errorText}`);
+    if (!flutterwaveResponse.ok) {
+      const errorText = await flutterwaveResponse.text();
+      console.error("Flutterwave API error:", errorText);
+      throw new Error(`Flutterwave API error: ${flutterwaveResponse.status} ${errorText}`);
     }
 
-    const paystackData = await paystackResponse.json();
+    const flutterwaveData = await flutterwaveResponse.json();
     
-    if (!paystackData.status) {
-      throw new Error(paystackData.message || "Paystack transaction initialization failed");
+    if (flutterwaveData.status !== "success") {
+      throw new Error(flutterwaveData.message || "Flutterwave transaction initialization failed");
     }
     
-    // Log the payment attempt to the payment_logs table
+    // Log the payment attempt
     try {
-      // Create a Supabase client with the service key
       const supabaseAdmin = await createAdminClient();
       
       await supabaseAdmin.from('payment_logs').insert({
-        payment_reference: paystackData.data.reference,
+        payment_reference: paymentPayload.tx_ref,
         event_type: 'initialize',
         status: 'pending',
         amount: amount,
-        provider: 'paystack',
+        provider: 'flutterwave',
         details: {
           request: {
             email,
@@ -81,22 +85,21 @@ serve(async (req) => {
             currency,
             callback_url
           },
-          response: paystackData
+          response: flutterwaveData
         }
       });
     } catch (logError) {
-      // Just log the error but don't interrupt the payment flow
       console.error("Error logging payment attempt:", logError);
     }
     
     return new Response(
       JSON.stringify({
         success: true,
-        reference: paystackData.data.reference,
+        reference: paymentPayload.tx_ref,
         message: "Payment initialized successfully",
-        redirectUrl: paystackData.data.authorization_url,
+        redirectUrl: flutterwaveData.data.link,
         status: "pending",
-        gatewayResponse: paystackData.data
+        gatewayResponse: flutterwaveData.data
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -104,7 +107,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error initializing Paystack payment:", error);
+    console.error("Error initializing Flutterwave payment:", error);
     
     return new Response(
       JSON.stringify({
