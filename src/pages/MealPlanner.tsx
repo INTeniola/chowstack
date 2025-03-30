@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -24,6 +23,7 @@ import SavePlanModal from '@/components/planner/SavePlanModal';
 import ClaudeRecommendations from '@/components/planner/ClaudeRecommendations';
 import { fetchMealPackages } from '@/utils/apiUtils';
 import { MealPackage } from '@/components/MealPackageCard';
+import localStorageUtils from '@/utils/localStorageUtils';
 
 const DEFAULT_FILTERS = {
   dietary: [],
@@ -46,7 +46,6 @@ const MealPlanner = () => {
     mealServings: 4, // Default people to serve
   });
 
-  // Load meal packages
   useEffect(() => {
     const loadMealPackages = async () => {
       try {
@@ -67,7 +66,13 @@ const MealPlanner = () => {
     loadMealPackages();
   }, []);
 
-  // Handle week navigation
+  useEffect(() => {
+    const storedPlans = localStorageUtils.getMealPlans();
+    if (storedPlans && storedPlans.length > 0) {
+      setSavedPlans(storedPlans);
+    }
+  }, []);
+
   const goToPreviousWeek = () => {
     const newWeekStart = subWeeks(weekStart, 1);
     setWeekStart(newWeekStart);
@@ -78,18 +83,14 @@ const MealPlanner = () => {
     setWeekStart(newWeekStart);
   };
 
-  // Handle drag and drop
   const handleMealDrop = (dayKey: string, meal: MealPackage) => {
     setMealPlan(prev => {
       const dayMeals = [...(prev[dayKey] || [])];
       
-      // Check if the meal is already in the plan for this day
       const existingIndex = dayMeals.findIndex(m => m.id === meal.id);
       if (existingIndex >= 0) {
-        // Replace the existing meal
         dayMeals[existingIndex] = meal;
       } else {
-        // Add the new meal
         dayMeals.push(meal);
       }
       
@@ -100,7 +101,6 @@ const MealPlanner = () => {
     });
   };
 
-  // Remove meal from plan
   const removeMealFromDay = (dayKey: string, mealId: string) => {
     setMealPlan(prev => {
       const dayMeals = prev[dayKey] ? prev[dayKey].filter(m => m.id !== mealId) : [];
@@ -110,7 +110,6 @@ const MealPlanner = () => {
         [dayKey]: dayMeals
       };
       
-      // If day is now empty, remove it from the plan
       if (newPlan[dayKey].length === 0) {
         delete newPlan[dayKey];
       }
@@ -124,7 +123,6 @@ const MealPlanner = () => {
     });
   };
 
-  // Save the current plan
   const savePlan = (planName: string) => {
     if (!planName.trim()) {
       toast({
@@ -142,6 +140,10 @@ const MealPlanner = () => {
     };
     
     setSavedPlans(prev => [...prev, newPlan]);
+    
+    const currentPlans = localStorageUtils.getMealPlans() || [];
+    localStorageUtils.saveMealPlans([...currentPlans, newPlan]);
+    
     setShowSaveModal(false);
     
     toast({
@@ -150,7 +152,6 @@ const MealPlanner = () => {
     });
   };
 
-  // Load a saved plan
   const loadPlan = (planIndex: number) => {
     if (savedPlans[planIndex]) {
       setMealPlan(savedPlans[planIndex].plan);
@@ -162,17 +163,14 @@ const MealPlanner = () => {
     }
   };
 
-  // Print the current plan
   const printPlan = () => {
     window.print();
   };
 
-  // Calculate totals
   const calculateTotals = () => {
     let totalCost = 0;
     let totalMeals = 0;
     
-    // Sum up all meals in the plan
     Object.values(mealPlan).forEach(dayMeals => {
       dayMeals.forEach(meal => {
         totalCost += meal.price;
@@ -212,7 +210,6 @@ const MealPlanner = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Main Calendar Area - Takes 3/4 of the space on large screens */}
             <div className="lg:col-span-3">
               <DndProvider backend={HTML5Backend}>
                 <Card>
@@ -268,7 +265,6 @@ const MealPlanner = () => {
               </DndProvider>
             </div>
             
-            {/* Sidebar - Takes 1/4 of the space on large screens */}
             <div className="lg:col-span-1">
               <div className="space-y-6">
                 <Card>
@@ -340,7 +336,6 @@ const MealPlanner = () => {
           </div>
         </div>
         
-        {/* Save Plan Modal */}
         {showSaveModal && (
           <SavePlanModal 
             onSave={savePlan}
