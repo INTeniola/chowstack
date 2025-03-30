@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LogIn, UserPlus } from 'lucide-react';
@@ -43,6 +44,12 @@ const Navbar: React.FC = () => {
             </li>
             <li>
               <Link to="/meal-planner" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Meal Planner</Link>
+            </li>
+            <li>
+              <Link to="/our-chefs" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Our Team</Link>
+            </li>
+            <li>
+              <Link to="/about" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">About</Link>
             </li>
             <li>
               <Link to="/contact" className="block py-2 pl-3 pr-4 text-foreground rounded hover:text-mealstock-green md:p-0">Contact</Link>
