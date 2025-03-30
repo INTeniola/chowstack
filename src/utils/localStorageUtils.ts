@@ -27,10 +27,10 @@ const localStorageUtils = {
   getMealPlans: () => {
     try {
       const data = localStorage.getItem(MEAL_PLANS_KEY);
-      return data ? JSON.parse(data) : null;
+      return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('Error retrieving meal plans from local storage:', error);
-      return null;
+      return [];
     }
   },
 

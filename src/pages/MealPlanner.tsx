@@ -38,8 +38,9 @@ const MealPlanner = () => {
   const [mealPlan, setMealPlan] = useState<Record<string, MealPackage[]>>({});
   const [mealPackages, setMealPackages] = useState<MealPackage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [savedPlans, setSavedPlans] = useState<{ name: string; plan: Record<string, MealPackage[]> }[]>([]);
+  const [savedPlans, setSavedPlans] = useState<{ name: string; plan: Record<string, MealPackage[]>; date?: string }[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [userPreferences, setUserPreferences] = useState({
     budget: 150000, // ₦150,000 default budget
     dietaryPreferences: ['Nigerian', 'West African'],
@@ -67,10 +68,15 @@ const MealPlanner = () => {
   }, []);
 
   useEffect(() => {
-    const storedPlans = localStorageUtils.getMealPlans();
-    if (storedPlans && storedPlans.length > 0) {
-      setSavedPlans(storedPlans);
-    }
+    const loadSavedPlans = () => {
+      const storedPlans = localStorageUtils.getMealPlans();
+      if (storedPlans && Array.isArray(storedPlans) && storedPlans.length > 0) {
+        console.log('Loaded saved plans:', storedPlans);
+        setSavedPlans(storedPlans);
+      }
+    };
+    
+    loadSavedPlans();
   }, []);
 
   const goToPreviousWeek = () => {
@@ -133,23 +139,35 @@ const MealPlanner = () => {
       return;
     }
     
-    const newPlan = {
-      name: planName,
-      plan: {...mealPlan},
-      date: new Date().toISOString()
-    };
+    setIsSaving(true);
     
-    setSavedPlans(prev => [...prev, newPlan]);
-    
-    const currentPlans = localStorageUtils.getMealPlans() || [];
-    localStorageUtils.saveMealPlans([...currentPlans, newPlan]);
-    
-    setShowSaveModal(false);
-    
-    toast({
-      title: "Plan saved",
-      description: `Your meal plan "${planName}" has been saved`,
-    });
+    try {
+      const newPlan = {
+        name: planName,
+        plan: {...mealPlan},
+        date: new Date().toISOString()
+      };
+      
+      const updatedPlans = [...savedPlans, newPlan];
+      setSavedPlans(updatedPlans);
+      
+      localStorageUtils.saveMealPlans(updatedPlans);
+      
+      toast({
+        title: "Plan saved",
+        description: `Your meal plan "${planName}" has been saved`,
+      });
+    } catch (error) {
+      console.error('Error saving plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save your meal plan",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+      setShowSaveModal(false);
+    }
   };
 
   const loadPlan = (planIndex: number) => {
@@ -217,7 +235,12 @@ const MealPlanner = () => {
                     <div className="flex justify-between items-center">
                       <CardTitle>Weekly Calendar</CardTitle>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setShowSaveModal(true)}>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowSaveModal(true)}
+                          disabled={isSaving || Object.keys(mealPlan).length === 0}
+                        >
                           <Save className="h-4 w-4 mr-1" />
                           Save Plan
                         </Button>
@@ -341,6 +364,7 @@ const MealPlanner = () => {
             onSave={savePlan}
             onCancel={() => setShowSaveModal(false)}
             open={showSaveModal}
+            isSaving={isSaving}
           />
         )}
       </main>

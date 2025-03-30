@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,11 +10,20 @@ interface SavePlanModalProps {
   onSave: (planName: string) => void;
   onCancel: () => void;
   open: boolean;
+  isSaving?: boolean;
 }
 
-const SavePlanModal: React.FC<SavePlanModalProps> = ({ onSave, onCancel, open }) => {
+const SavePlanModal: React.FC<SavePlanModalProps> = ({ onSave, onCancel, open, isSaving = false }) => {
   const [planName, setPlanName] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const [internalSaving, setInternalSaving] = useState(false);
+  
+  // Reset form state when modal opens/closes
+  useEffect(() => {
+    if (open) {
+      setPlanName('');
+      setInternalSaving(false);
+    }
+  }, [open]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,22 +32,18 @@ const SavePlanModal: React.FC<SavePlanModalProps> = ({ onSave, onCancel, open })
       return; // Don't submit if name is empty
     }
     
-    setIsSaving(true);
+    setInternalSaving(true);
     
-    try {
-      onSave(planName);
-      // Reset form and state after saving
-      setPlanName('');
-    } catch (error) {
-      console.error('Error saving plan:', error);
-    } finally {
-      setIsSaving(false);
-    }
+    // Call the parent's onSave method
+    onSave(planName);
   };
+
+  // Use either the internal or external saving state
+  const isSubmitting = internalSaving || isSaving;
   
   return (
     <Dialog open={open} onOpenChange={(open) => {
-      if (!open && !isSaving) {
+      if (!open && !isSubmitting) {
         onCancel();
       }
     }}>
@@ -57,16 +62,16 @@ const SavePlanModal: React.FC<SavePlanModalProps> = ({ onSave, onCancel, open })
               placeholder="My Meal Plan"
               className="w-full"
               autoFocus
-              disabled={isSaving}
+              disabled={isSubmitting}
             />
           </div>
           
           <DialogFooter className="pt-4">
-            <Button variant="outline" type="button" onClick={onCancel} disabled={isSaving}>
+            <Button variant="outline" type="button" onClick={onCancel} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSaving || !planName.trim()}>
-              {isSaving ? (
+            <Button type="submit" disabled={isSubmitting || !planName.trim()}>
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
