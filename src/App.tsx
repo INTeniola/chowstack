@@ -1,4 +1,3 @@
-
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
@@ -24,6 +23,10 @@ import Register from "./pages/Register";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
+
+// User profile pages
+import Profile from "./pages/Profile";
+import Orders from "./pages/Orders";
 
 // Other pages
 import About from "./pages/About";
@@ -73,6 +76,24 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Onboarding />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* User Profile Routes - Require Authentication */}
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/orders" 
+              element={
+                <ProtectedRoute>
+                  <Orders />
                 </ProtectedRoute>
               } 
             />
